@@ -2,7 +2,7 @@
 <html lang="en" class="body-full-height">
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1%">
 
     <title>Accounts</title>
 
@@ -73,7 +73,7 @@
                                         <th>Last Name</th>
                                         <th>Email</th>
                                         <th>Phone</th>
-                                        <th>&nbsp;</th>
+                                        <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -89,6 +89,12 @@
                                                     <a href="/accounts-view?aid={{ account.aid }}">
                                                         <span class="fa fa-pencil"></span>
                                                     </a>
+                                                    {% if account.latest_file is defined and account.latest_file %}
+                                                        <a href="/simple-audit?file={{ account.latest_file }}" class="btn btn-xs btn-primary" style="margin-left:6px;">Simple Audit</a>
+                                                        <a href="/simple-audit.pdf?file={{ account.latest_file }}" class="btn btn-xs btn-default" target="_blank" style="margin-left:6px;">PDF</a>
+                                                    {% else %}
+                                                        <span class="text-muted" style="margin-left:8px;">No report</span>
+                                                    {% endif %}
                                                 </td>
                                             </tr>
                                         {% endfor %}

@@ -337,7 +337,21 @@
         private function get_accounts(ManagerRegistry $doctrine, $aid = null) {
 
             if(is_null($aid)) {
-                $query = "SELECT * FROM accounts ORDER BY last_name DESC";
+                // Include latest uploaded file (if any) for quick access to Simple Audit
+                $query = "
+                    SELECT a.*, f.filename AS latest_file, f.added AS latest_added
+                    FROM accounts a
+                    LEFT JOIN (
+                        SELECT t1.aid, t1.filename, t1.added
+                        FROM account_files t1
+                        INNER JOIN (
+                            SELECT aid, MAX(added) AS max_added
+                            FROM account_files
+                            GROUP BY aid
+                        ) t2 ON t1.aid = t2.aid AND t1.added = t2.max_added
+                    ) f ON a.aid = f.aid
+                    ORDER BY a.last_name DESC
+                ";
                 $params = [];
             } else {
                 $query = "SELECT * FROM accounts WHERE aid = :aid LIMIT 1";
