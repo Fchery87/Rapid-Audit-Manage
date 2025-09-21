@@ -1,0 +1,55 @@
+{# Custom form theme to match admin form-horizontal layout #}
+
+{% block form_row -%}
+    {%- set errors_html = form_errors(form) -%}
+    <div class="form-group{% if errors_html is not empty %} has-error{% endif %}">
+        {{- form_label(form) -}}
+        <div class="col-md-6 col-xs-12">
+            {{- form_widget(form) -}}
+            {{- errors_html|raw -}}
+        </div>
+    </div>
+{%- endblock %}
+
+{% block form_label -%}
+    {%- if label is not same as(false) -%}
+        {%- set label_attr = label_attr|merge({
+            class: (label_attr.class|default('') ~ ' col-md-3 col-xs-12 control-label')|trim
+        }) -%}
+        {{- parent() -}}
+    {%- endif -%}
+{%- endblock %}
+
+{# Ensure consistent form-control class on inputs #}
+{% block form_widget_simple -%}
+    {%- set attr = attr|merge({
+        class: (attr.class|default('') ~ ' form-control')|trim
+    }) -%}
+    {{- parent() -}}
+{%- endblock %}
+
+{% block textarea_widget -%}
+    {%- set attr = attr|merge({
+        class: (attr.class|default('') ~ ' form-control')|trim
+    }) -%}
+    {{- parent() -}}
+{%- endblock %}
+
+{# Style selects with .form-control and .select for theme #}
+{% block choice_widget_collapsed -%}
+    {%- set attr = attr|merge({
+        class: (attr.class|default('') ~ ' form-control select')|trim
+    }) -%}
+    {{- parent() -}}
+{%- endblock %}
+
+{# Render errors inline beneath widgets using admin styles #}
+{% block form_errors -%}
+    {%- if errors|length > 0 -%}
+        <ul class="help-block text-danger" style="margin:6px 0 0;">
+            {%- for error in errors -%}
+                <li>{{ error.message }}</li>
+            {%- endfor -%}
+        </ul>
+    {%- endif -%}
+{%- endblock %}
