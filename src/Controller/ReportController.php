@@ -7,6 +7,7 @@
     use Symfony\Component\HttpFoundation\Request;
     use Doctrine\Persistence\ManagerRegistry;
     use App\Service\FileStorage;
+    use App\Form\AccountType;
 
     class ReportController extends AbstractController {
 
@@ -143,98 +144,70 @@
             $messages = array();
             $errors = array();
 
-            $parameters = array(
-                "first_name"                =>  $request->request->get('first_name', ""),
-                "last_name"                 =>  $request->request->get('last_name', ""),
-                "email"                     =>  $request->request->get('email', ""),
-                "phone"                     =>  $request->request->get('phone', ""),
-                "address1"                  =>  $request->request->get('address1', ""),
-                "address2"                  =>  $request->request->get('address2', ""),
-                "city"                      =>  $request->request->get('city', ""),
-                "state"                     =>  $request->request->get('state', ""),
-                "zip"                       =>  $request->request->get('zip', ""),
-                "social"                    =>  $request->request->get('social', ""),
-                "credit_company"            =>  $request->request->get('credit_company', ""),
-                "credit_company_user"       =>  $request->request->get('credit_company_user', ""),
-                "credit_company_password"   =>  $request->request->get('credit_company_password', ""),
-                "credit_company_code"       =>  $request->request->get('credit_company_code', ""),
-            );
-
-            if ($request->isMethod('POST')) {
-
-                if (!$this->isCsrfTokenValid('account_edit_form', $request->request->get('_token'))) {
-                    $errors[] = "Invalid CSRF token.";
-                }
-
-                if($this->validate_name($parameters['first_name']) == false) {
-                    $errors[] = "Invalid First Name.";
-                }
-                if($this->validate_name($parameters['last_name']) == false) {
-                    $errors[] = "Invalid Last Name";
-                }
-                if($this->validate_name($parameters['email']) == false) {
-                    $errors[] = "Invalid Email";
-                }
-                if($this->validate_name($parameters['phone']) == false) {
-                    $errors[] = "Invalid Phone Number";
-                }
-                if($this->validate_name($parameters['address1']) == false) {
-                    $errors[] = "Invalid Address1";
-                }
-                if($this->validate_name($parameters['city']) == false) {
-                    $errors[] = "Invalid City";
-                }
-                if($this->validate_name($parameters['zip']) == false) {
-                    $errors[] = "Invalid Zip Code";
-                }
-                if($this->validate_name($parameters['social']) == false) {
-                    $errors[] = "Invalid Social";
-                }
-
-                if(count($errors) == 0) {
-                    $em = $doctrine->getManager();
-                    $conn = $em->getConnection();
-                    $query = "UPDATE accounts SET first_name = :first_name, last_name = :last_name, email = :email, phone = :phone, address1 = :address1, address2 = :address2, city = :city, state = :state, zip = :zip, social = :social, credit_company = :credit_company, credit_company_user = :credit_company_user, credit_company_password = :credit_company_password, credit_company_code = :credit_company_code WHERE aid = :aid LIMIT 1";
-                    $statement = $conn->prepare($query);
-                    $affected = $statement->executeStatement([
-                        "first_name" => $parameters['first_name'],
-                        "last_name" => $parameters['last_name'],
-                        "email" => $parameters['email'],
-                        "phone" => $parameters['phone'],
-                        "address1" => $parameters['address1'],
-                        "address2" => $parameters['address2'],
-                        "city" => $parameters['city'],
-                        "state" => $parameters['state'],
-                        "zip" => $parameters['zip'],
-                        "social" => $parameters['social'],
-                        "credit_company" => $parameters['credit_company'],
-                        "credit_company_user" => $parameters['credit_company_user'],
-                        "credit_company_password" => $parameters['credit_company_password'],
-                        "credit_company_code" => $parameters['credit_company_code'],
-                        "aid" => $aid,
-                    ]);
-                    if($affected >= 0) {
-                        $messages[] = "Account sucessfully udpated!";
-                    } else {
-                        $errors[] = "Failed to update record. Contact admin";
-                    }
-                }
+            if(!$aid) {
+                return $this->render("report/accounts-view-not-found.html.twig", []);
             }
 
-            if($aid) {
-                $account_info = $this->get_accounts($doctrine, $aid);
-
-                if(count($account_info) == 0) {
-                    return $this->render("report/accounts-view-not-found.html.twig", []);
-                }
-            } else {
+            $account_info = $this->get_accounts($doctrine, $aid);
+            if(count($account_info) == 0) {
                 return $this->render("report/accounts-view-not-found.html.twig", []);
+            }
+            $initial = $account_info[0];
+
+            // Build Symfony Form with initial data
+            $form = $this->createForm(AccountType::class, [
+                "first_name" => $initial['first_name'] ?? "",
+                "last_name" => $initial['last_name'] ?? "",
+                "email" => $initial['email'] ?? "",
+                "phone" => $initial['phone'] ?? "",
+                "address1" => $initial['address1'] ?? "",
+                "address2" => $initial['address2'] ?? "",
+                "city" => $initial['city'] ?? "",
+                "state" => $initial['state'] ?? "",
+                "zip" => $initial['zip'] ?? "",
+                "social" => $initial['social'] ?? "",
+                "credit_company" => $initial['credit_company'] ?? "",
+                "credit_company_user" => $initial['credit_company_user'] ?? "",
+                "credit_company_password" => $initial['credit_company_password'] ?? "",
+                "credit_company_code" => $initial['credit_company_code'] ?? "",
+            ]);
+            $form->handleRequest($request);
+
+            if ($form->isSubmitted() && $form->isValid()) {
+                $data = $form->getData();
+                $em = $doctrine->getManager();
+                $conn = $em->getConnection();
+                $query = "UPDATE accounts SET first_name = :first_name, last_name = :last_name, email = :email, phone = :phone, address1 = :address1, address2 = :address2, city = :city, state = :state, zip = :zip, social = :social, credit_company = :credit_company, credit_company_user = :credit_company_user, credit_company_password = :credit_company_password, credit_company_code = :credit_company_code WHERE aid = :aid LIMIT 1";
+                $statement = $conn->prepare($query);
+                $affected = $statement->executeStatement([
+                    "first_name" => $data['first_name'],
+                    "last_name" => $data['last_name'],
+                    "email" => $data['email'],
+                    "phone" => $data['phone'],
+                    "address1" => $data['address1'],
+                    "address2" => $data['address2'],
+                    "city" => $data['city'],
+                    "state" => $data['state'],
+                    "zip" => $data['zip'],
+                    "social" => $data['social'],
+                    "credit_company" => $data['credit_company'],
+                    "credit_company_user" => $data['credit_company_user'],
+                    "credit_company_password" => $data['credit_company_password'],
+                    "credit_company_code" => $data['credit_company_code'],
+                    "aid" => $aid,
+                ]);
+                if($affected >= 0) {
+                    $messages[] = "Account sucessfully udpated!";
+                } else {
+                    $errors[] = "Failed to update record. Contact admin";
+                }
             }
 
             return $this->render("report/accounts-edit.html.twig", [
                 "errors"        =>  $errors,
                 "messages"      =>  $messages,
-                "parameters"    =>  $account_info[0]
+                "parameters"    =>  $initial,
+                "form"          =>  $form->createView(),
             ]);
         }
 
@@ -243,84 +216,44 @@
             $messages = array();
             $errors = array();
 
-            $parameters = array(
-                "first_name"                =>  $request->request->get('first_name', ""),
-                "last_name"                 =>  $request->request->get('last_name', ""),
-                "email"                     =>  $request->request->get('email', ""),
-                "phone"                     =>  $request->request->get('phone', ""),
-                "address1"                  =>  $request->request->get('address1', ""),
-                "address2"                  =>  $request->request->get('address2', ""),
-                "city"                      =>  $request->request->get('city', ""),
-                "state"                     =>  $request->request->get('state', ""),
-                "zip"                       =>  $request->request->get('zip', ""),
-                "social"                    =>  $request->request->get('social', ""),
-                "credit_company"            =>  $request->request->get('credit_company', ""),
-                "credit_company_user"       =>  $request->request->get('credit_company_user', ""),
-                "credit_company_password"   =>  $request->request->get('credit_company_password', ""),
-                "credit_company_code"       =>  $request->request->get('credit_company_code', ""),
-            );
+            $form = $this->createForm(AccountType::class);
+            $form->handleRequest($request);
 
-            if ($request->isMethod('POST')) {
+            if ($form->isSubmitted() && $form->isValid()) {
+                $data = $form->getData();
 
-                if (!$this->isCsrfTokenValid('account_add_form', $request->request->get('_token'))) {
-                    $errors[] = "Invalid CSRF token.";
-                }
+                $em = $doctrine->getManager();
+                $conn = $em->getConnection();
+                // Check to see if email already exists
+                $query = "SELECT COUNT(*) `rows` FROM accounts WHERE email = :email";
+                $rows = $conn->prepare($query)->executeQuery(["email" => $data['email']])->fetchAllAssociative();
 
-                if($this->validate_name($parameters['first_name']) == false) {
-                    $errors[] = "Invalid First Name.";
-                }
-                if($this->validate_name($parameters['last_name']) == false) {
-                    $errors[] = "Invalid Last Name";
-                }
-                if($this->validate_name($parameters['email']) == false) {
-                    $errors[] = "Invalid Email";
-                }
-                if($this->validate_name($parameters['phone']) == false) {
-                    $errors[] = "Invalid Phone Number";
-                }
-                if($this->validate_name($parameters['address1']) == false) {
-                    $errors[] = "Invalid Address1";
-                }
-                if($this->validate_name($parameters['city']) == false) {
-                    $errors[] = "Invalid City";
-                }
-                if($this->validate_name($parameters['zip']) == false) {
-                    $errors[] = "Invalid Zip Code";
-                }
-                if($this->validate_name($parameters['social']) == false) {
-                    $errors[] = "Invalid Social";
-                }
-
-                if(count($errors) == 0) {
-                    $em = $doctrine->getManager();
-                    $conn = $em->getConnection();
-                    // Check to see if email already exists
-                    $query = "SELECT COUNT(*) `rows` FROM accounts WHERE email = :email";
-                    $rows = $conn->prepare($query)->executeQuery(["email" => $parameters['email']])->fetchAllAssociative();
-
-                    if($rows[0]['rows'] > 0) {
-                        $errors[] = "Email address already exists";
+                if($rows[0]['rows'] > 0) {
+                    $errors[] = "Email address already exists";
+                } else {
+                    $query = "INSERT INTO accounts SET first_name = :first_name, last_name = :last_name, email = :email, phone = :phone, address1 = :address1, address2 = :address2, city = :city, state = :state, zip = :zip, social = :social, credit_company = :credit_company, credit_company_user = :credit_company_user, credit_company_password = :credit_company_password, credit_company_code = :credit_company_code, created = NOW()";
+                    $affected = $conn->prepare($query)->executeStatement([
+                        "first_name" => $data['first_name'],
+                        "last_name" => $data['last_name'],
+                        "email" => $data['email'],
+                        "phone" => $data['phone'],
+                        "address1" => $data['address1'],
+                        "address2" => $data['address2'],
+                        "city" => $data['city'],
+                        "state" => $data['state'],
+                        "zip" => $data['zip'],
+                        "social" => $data['social'],
+                        "credit_company" => $data['credit_company'],
+                        "credit_company_user" => $data['credit_company_user'],
+                        "credit_company_password" => $data['credit_company_password'],
+                        "credit_company_code" => $data['credit_company_code'],
+                    ]);
+                    if($affected > 0) {
+                        $messages[] = "Account sucessfully added!";
+                        // Optionally redirect after success
+                        // return $this->redirect('/accounts');
                     } else {
-                        $query = "INSERT INTO accounts SET first_name = :first_name, last_name = :last_name, email = :email, phone = :phone, address1 = :address1, address2 = :address2, city = :city, state = :state, zip = :zip, social = :social, credit_company = :credit_company, credit_company_user = :credit_company_user, credit_company_password = :credit_company_password, credit_company_code = :credit_company_code, created = NOW()";
-                        $affected = $conn->prepare($query)->executeStatement([
-                            "first_name" => $parameters['first_name'],
-                            "last_name" => $parameters['last_name'],
-                            "email" => $parameters['email'],
-                            "phone" => $parameters['phone'],
-                            "address1" => $parameters['address1'],
-                            "address2" => $parameters['address2'],
-                            "city" => $parameters['city'],
-                            "state" => $parameters['state'],
-                            "zip" => $parameters['zip'],
-                            "social" => $parameters['social'],
-                            "credit_company" => $parameters['credit_company'],
-                            "credit_company_user" => $parameters['credit_company_user'],
-                            "credit_company_password" => $parameters['credit_company_password'],
-                            "credit_company_code" => $parameters['credit_company_code'],
-                        ]);
-                        if($affected > 0) {
-                            $messages[] = "Account sucessfully added!";
-                        }
+                        $errors[] = "Failed to create account.";
                     }
                 }
             }
@@ -328,7 +261,7 @@
             return $this->render("report/accounts-add.html.twig", [
                 "errors"        =>  $errors,
                 "messages"      =>  $messages,
-                "parameters"    =>  $parameters
+                "form"          =>  $form->createView(),
             ]);
         }
 
