@@ -9,8 +9,9 @@
 /vendor/
 
 # Symfony / Cache & Logs
-/var/
-!.gitkeep
+/var/*
+!/var/uploads/
+!/var/uploads/.gitkeep
 /var/cache/
 /var/log/
 /var/sessions/

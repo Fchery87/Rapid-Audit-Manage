@@ -4,54 +4,53 @@
 
     use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
     use Symfony\Component\HttpFoundation\Response;
+    use Symfony\Component\HttpFoundation\Request;
+    use Doctrine\Persistence\ManagerRegistry;
+    use App\Service\FileStorage;
 
     class ReportController extends AbstractController {
 
         private $errors = array();
         private $message = "";
-        private $directory = "../misc";
+        private $directory = "var/uploads";
 
         public function dashboard() {
             return $this->render("dashboard/dashboard-sample.html.twig", [
             ]);
         }
 
-        public function __init() {
+        public function __init(Request $request, FileStorage $storage) {
 
             $filename = "none";
+            $errors = [];
 
-            if(isset($_POST['upload']) && $_POST['upload'] == "true") {
-                $filename = $_FILES['html_file']['name'];
+            if ($request->isMethod('POST') && $request->request->get('upload') === "true") {
 
-                switch ($_FILES['html_file']['error']) {
-                    case UPLOAD_ERR_OK:
-                        break;
-                    case UPLOAD_ERR_NO_FILE:
-                        $this->errors[] = "No file sent";
-                        break;
-                    case UPLOAD_ERR_INI_SIZE:
-                    case UPLOAD_ERR_FORM_SIZE:
-                        $this->errors[] = "File too large";
-                        break;
-                    default:
-                        $this->errors[] = "Unknown error";
+                if (!$this->isCsrfTokenValid('global_upload', $request->request->get('_token'))) {
+                    $errors[] = 'Invalid CSRF token.';
                 }
 
-                if(count($this->errors) == 0) {
-                    if(move_uploaded_file($_FILES['html_file']['tmp_name'],"../misc/".$filename)) {
+                $uploadedFile = $request->files->get('html_file');
+                if (!$uploadedFile) {
+                    $errors[] = 'No file sent';
+                }
+
+                if (count($errors) === 0) {
+                    try {
+                        $stored = $storage->storeUploadedHtml($uploadedFile);
+                        $filename = $stored;
                         $this->message = "Upload successful!";
-                    } else {
-                        $this->errors[] = 'Failed to upload file';
+                    } catch (\RuntimeException $e) {
+                        $errors[] = $e->getMessage();
                     }
                 }
-                
             }
 
             return $this->render("report/report.html.twig", [
                 "filename"      =>      $filename,
-                "errors"        =>      $this->errors,
+                "errors"        =>      $errors,
                 "message"       =>      $this->message,
-                "files"         =>      $this->get_files(),
+                "files"         =>      $storage->listHtmlFilenames(),
             ]);
         }
 
@@ -62,80 +61,71 @@
             ]);
         }
 
-        public function view_Accounts() {
+        public function view_Accounts(Request $request, ManagerRegistry $doctrine, FileStorage $storage) {
 
-            $aid = isset($_REQUEST['aid']) ? htmlentities($_REQUEST['aid']) : null;
+            $aid = $request->query->get('aid');
             $errors = array();
             $messages = array();
 
             if($aid) {
-                $em = $this->getDoctrine()->getManager();
+                $em = $doctrine->getManager();
+                $conn = $em->getConnection();
                 $query = "SELECT * FROM accounts WHERE aid = :aid LIMIT 1";
-                $statement = $em->getConnection()->prepare($query);
-                $statement->bindValue("aid", $aid);
-                $result = $statement->executeQuery();
+                $statement = $conn->prepare($query);
+                $result = $statement->executeQuery(['aid' => $aid]);
                 $rows = $result->fetchAllAssociative();
 
                 if(count($rows) > 0) {
 
                     // Upload
-                    if(isset($_POST['upload'])) {
-                        $filename = md5($_FILES['html_file']['name']);
-        
-                        switch ($_FILES['html_file']['error']) {
-                            case UPLOAD_ERR_OK:
-                                break;
-                            case UPLOAD_ERR_NO_FILE:
-                                $errors[] = "No file sent";
-                                break;
-                            case UPLOAD_ERR_INI_SIZE:
-                            case UPLOAD_ERR_FORM_SIZE:
-                                $errors[] = "File too large";
-                                break;
-                            default:
-                                $errors[] = "Unknown error";
+                    if ($request->isMethod('POST') && $request->request->get('upload')) {
+
+                        if (!$this->isCsrfTokenValid('account_upload', $request->request->get('_token'))) {
+                            $errors[] = "Invalid CSRF token.";
                         }
-        
-                        if(count($this->errors) == 0) {
 
-                            $query = "SELECT * FROM account_files WHERE aid = :aid AND filename = :filename";
-                            $statement = $em->getConnection()->prepare($query);
-                            $statement->bindValue("aid", $aid);
-                            $statement->bindValue("filename", $filename);
-                            $result = $statement->executeQuery();
-                            $file_check = $result->fetchAllAssociative();
+                        $uploadedFile = $request->files->get('html_file');
+                        if (!$uploadedFile) {
+                            $errors[] = "No file sent";
+                        }
 
-                            if(count($file_check) == 0) {
+                        if(count($errors) === 0) {
+                            try {
+                                $storedName = $storage->storeUploadedHtml($uploadedFile);
 
-                                if(move_uploaded_file($_FILES['html_file']['tmp_name'],"../misc/".$filename)) {
+                                // Prevent duplicate association for this account+file
+                                $query = "SELECT * FROM account_files WHERE aid = :aid AND filename = :filename";
+                                $statement = $conn->prepare($query);
+                                $result = $statement->executeQuery(['aid' => $aid, 'filename' => $storedName]);
+                                $file_check = $result->fetchAllAssociative();
+
+                                if(count($file_check) == 0) {
                                     $query = "INSERT INTO account_files SET aid = :aid, filename = :filename, added = NOW()";
-                                    $statement = $em->getConnection()->prepare($query);
-                                    $statement->bindValue("aid", $aid);
-                                    $statement->bindValue("filename", $filename);
-                                    $statement->executeStatement();
+                                    $statement = $conn->prepare($query);
+                                    $statement->executeStatement(['aid' => $aid, 'filename' => $storedName]);
 
                                     $messages[] = "Upload successful!";
                                 } else {
-                                    $errors[] = 'Failed to upload file';
+                                    $errors[] = "File already exists for this user.";
                                 }
-                            } else {
-                                $errors[] = "File already exists for this user.";
+
+                            } catch (\RuntimeException $e) {
+                                $errors[] = $e->getMessage();
                             }
                         }
                     }
 
                     // Get all reports
                     $query = "SELECT * FROM account_files WHERE aid = :aid ORDER BY added DESC";
-                    $statement = $em->getConnection()->prepare($query);
-                    $statement->bindValue("aid", $aid);
-                    $result = $statement->executeQuery();
+                    $statement = $conn->prepare($query);
+                    $result = $statement->executeQuery(['aid' => $aid]);
                     $files = $result->fetchAllAssociative();
 
                     return $this->render("report/accounts-view.html.twig", [
                         "account_info"  =>  $rows[0],
                         "errors"        =>  $errors,
                         "messages"      =>  $messages,
-                        "files"         =>  $files,  
+                        "files"         =>  $files,
                     ]);
                 } else {
                     return $this->render("report/accounts-view-not-found.html.twig", []);
@@ -144,9 +134,6 @@
             } else {
                 return $this->render("report/accounts-view-not-found.html.twig", []);
             }
-
-            return $this->render("report/accounts-view.html.twig", [
-            ]);
         }
 
         public function edit_Accounts() {

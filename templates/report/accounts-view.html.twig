@@ -96,10 +96,16 @@
                             <h3>Add Report</h3>
                             <form id="uploader" method="post" action="/accounts-view?aid={{ account_info.aid }}" enctype="multipart/form-data" class="horizontal">
                                 <input type="hidden" name="upload" value="true" />
+                                <input type="hidden" name="_token" value="{{ csrf_token('account_upload') }}">
                                 <div class="form-group"> 
                                     <label for="html_file" class="col-md-3 col-xs-12 control-label">File</label>
                                     <div class="col-md-12">
-                                        <input id="file-uploader" type="file" class="file" data-preview-file-type="html" accept="text/html, text/htm" name="html_file" >
+                                        <input id="file-uploader" type="file" class="file" data-preview-file-type="html" accept="text/html, text/htm, application/xhtml+xml" name="html_file" >
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-12" style="margin-top:10px;">
+                                        <input type="submit" class="btn btn-primary" value="Upload">
                                     </div>
                                 </div>
                             </form>
