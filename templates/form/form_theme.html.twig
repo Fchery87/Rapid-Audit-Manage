@@ -1,0 +1,154 @@
+{# Custom form theme to match admin form-horizontal layout #}
+
+{% block form_row -%}
+    {%- set errors_html = form_errors(form) -%}
+    <div class="form-group{% if errors_html is not empty %} has-error{% endif %}">
+        {{- form_label(form) -}}
+        <div class="col-md-6 col-xs-12">
+            {{- form_widget(form) -}}
+            {{- errors_html|raw -}}
+        </div>
+    </div>
+{%- endblock %}
+
+{% block form_label -%}
+    {%- if label is not same as(false) -%}
+        {%- set label_attr = label_attr|merge({
+            class: (label_attr.class|default('') ~ ' col-md-3 col-xs-12 control-label')|trim
+        }) -%}
+        {{- parent() -}}
+    {%- endif -%}
+{%- endblock %}
+
+{# Ensure consistent form-control class on inputs #}
+{% block form_widget_simple -%}
+    {%- set attr = attr|merge({
+        class: (attr.class|default('') ~ ' form-control')|trim
+    }) -%}
+    {{- parent() -}}
+{%- endblock %}
+
+{% block textarea_widget -%}
+    {%- set attr = attr|merge({
+        class: (attr.class|default('') ~ ' form-control')|trim
+    }) -%}
+    {{- parent() -}}
+{%- endblock %}
+
+{# Style selects with .form-control and .select for theme #}
+{% block choice_widget_collapsed -%}
+    {%- set attr = attr|merge({
+        class: (attr.class|default('') ~ ' form-control select')|trim
+    }) -%}
+    {{- parent() -}}
+{%- endblock %}
+
+{# Render errors inline beneath widgets using admin styles #}
+{% block form_errors -%}
+    {%- if errors|length > 0 -%}
+        <ul class="help-block text-danger" style="margin:6px 0 0;">
+            {%- for error in errors -%}
+                <li>{{ error.message }}</li>
+            {%- endfor -%}
+        </ul>
+    {%- endif -%}
+{%- endblock %}
+
+{# Field-specific widgets with input-group icons for AccountType #}
+{% block _account_email_widget -%}
+    <div class="input-group">
+        <span class="input-group-addon"><span class="fa fa-envelope"></span></span>
+        {{- parent() -}}
+    </div>
+{%- endblock %}
+
+{% block _account_phone_widget -%}
+    <div class="input-group">
+        <span class="input-group-addon"><span class="fa fa-phone"></span></span>
+        {{- parent() -}}
+    </div>
+{%- endblock %}
+
+{% block _account_first_name_widget -%}
+    <div class="input-group">
+        <span class="input-group-addon"><span class="fa fa-user"></span></span>
+        {{- parent() -}}
+    </div>
+{%- endblock %}
+
+{% block _account_last_name_widget -%}
+    <div class="input-group">
+        <span class="input-group-addon"><span class="fa fa-user"></span></span>
+        {{- parent() -}}
+    </div>
+{%- endblock %}
+
+{% block _account_address1_widget -%}
+    <div class="input-group">
+        <span class="input-group-addon"><span class="fa fa-map-marker"></span></span>
+        {{- parent() -}}
+    </div>
+{%- endblock %}
+
+{% block _account_address2_widget -%}
+    <div class="input-group">
+        <span class="input-group-addon"><span class="fa fa-map-marker"></span></span>
+        {{- parent() -}}
+    </div>
+{%- endblock %}
+
+{% block _account_city_widget -%}
+    <div class="input-group">
+        <span class="input-group-addon"><span class="fa fa-building"></span></span>
+        {{- parent() -}}
+    </div>
+{%- endblock %}
+
+{% block _account_state_widget -%}
+    <div class="input-group">
+        <span class="input-group-addon"><span class="fa fa-building"></span></span>
+        {{- parent() -}}
+    </div>
+{%- endblock %}
+
+{% block _account_zip_widget -%}
+    <div class="input-group">
+        <span class="input-group-addon"><span class="fa fa-hashtag"></span></span>
+        {{- parent() -}}
+    </div>
+{%- endblock %}
+
+{% block _account_social_widget -%}
+    <div class="input-group">
+        <span class="input-group-addon"><span class="fa fa-id-card"></span></span>
+        {{- parent() -}}
+    </div>
+{%- endblock %}
+
+{% block _account_credit_company_widget -%}
+    <div class="input-group">
+        <span class="input-group-addon"><span class="fa fa-briefcase"></span></span>
+        {{- parent() -}}
+    </div>
+{%- endblock %}
+
+{% block _account_credit_company_user_widget -%}
+    <div class="input-group">
+        <span class="input-group-addon"><span class="fa fa-user-circle"></span></span>
+        {{- parent() -}}
+    </div>
+{%- endblock %}
+
+{% block _account_credit_company_password_widget -%}
+    <div class="input-group">
+        <span class="input-group-addon"><span class="fa fa-lock"></span></span>
+        {{- parent() -}}
+    </div>
+{%- endblock %}
+
+{% block _account_credit_company_code_widget -%}
+    <div class="input-group">
+        <span class="input-group-addon"><span class="fa fa-key"></span></span>
+        {{- parent() -}}
+    </div>
+{%- endblock %}

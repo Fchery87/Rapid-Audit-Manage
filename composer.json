@@ -1,4 +1,6 @@
 {
+    "name": "fchery87/rapid-audit-manage",
+    "description": "Rapid Audit Manage application built with Symfony 6.4 for credit report uploads, analysis, and Simple Audit generation.",
     "type": "project",
     "license": "proprietary",
     "require": {
@@ -14,10 +16,10 @@
         "symfony/form": "^6.4",
         "symfony/framework-bundle": "^6.4",
         "symfony/monolog-bundle": "^3.8",
-        "symfony/orm-pack": "*",
+        "symfony/orm-pack": "^2.6",
         "symfony/process": "^6.4",
         "symfony/security-bundle": "^6.4",
-        "symfony/serializer-pack": "*",
+        "symfony/serializer-pack": "^1.0",
         "symfony/mailer": "^6.4",
         "symfony/translation": "^6.4",
         "symfony/twig-bundle": "^6.4",
@@ -38,7 +40,10 @@
         "preferred-install": {
             "*": "dist"
         },
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "symfony/flex": true
+        }
     },
     "autoload": {
         "psr-4": {
