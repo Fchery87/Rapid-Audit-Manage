@@ -1,0 +1,341 @@
+{
+  "meta": {
+    "generated_at": "2025-09-21T00:00:00Z",
+    "agent": "genie",
+    "scope": "full-repo review",
+    "notes": [
+      "User requested analysis of docs/ directory. No docs/ directory exists in the repository. Recommendation: create docs/ with architecture, ADRs, and runbooks.",
+      "Report filename and directory follow user's requested path: ocs/reports/[date].[agent]..software.json (ocs/ appears intentional)."
+    ]
+  },
+  "summary": {
+    "stack": {
+      "language": "PHP 7.1",
+      "framework": "Symfony 4.2.x",
+      "templating": "Twig",
+      "db": "Doctrine DBAL/ORM pack present; code uses raw SQL (no Entities for accounts).",
+      "ui_assets": "Static admin template under public/templates/joli",
+      "mailer": "Swiftmailer (deprecated)",
+      "tests": "PHPUnit config present; no tests directory found"
+    },
+    "overall_health": "High security and maintainability risk due to EOL PHP (7.1) and Symfony (4.2), deprecated packages (Swiftmailer), direct superglobals usage, raw SQL in controllers, missing domain entities and validation layers, file upload and parsing logic coupled into controllers, and minimal documentation/tests.",
+    "top_risks": [
+      "EOL platform (PHP 7.1.3 and Symfony 4.2) with known vulnerabilities and unsupported dependencies.",
+      "Insecure request handling: direct use of $_GET/$_POST/$_FILES and echoing values into templates increases XSS/CSRF risk.",
+      "Unsafe file uploads to ../misc with weak validation and potential path traversal, MIME spoofing, and execution risks.",
+      "Business logic and parsing tightly coupled to controllers (ParserController ~800 LOC) with brittle DOM parsing and magic method names (__init).",
+      "Security bundle config outdated; encoders (bcrypt) instead of password hashers; broad access_control; missing CSRF protection on forms.",
+      "Data layer inconsistencies: Accounts entity is empty; heavy reliance on raw SQL; no migrations present in repo.",
+      "No CI, coding standards, or static analysis enforcement; no tests present; .DS_Store tracked."
+    ],
+    "opportunities": [
+      "Modernize to PHP 8.2/8.3 and Symfony 6.4 LTS or 7.x.",
+      "Adopt clean architecture: controllers thin, services for parsing/reporting, repositories/entities for persistence.",
+      "Harden security around authentication, authorization, file uploads, and input validation.",
+      "Introduce CI (GitHub Actions), static analysis (PHPStan/Psalm), and code style (PHP-CS-Fixer/PHPCS).",
+      "Create structured documentation (docs/) and ADRs."
+    ]
+  },
+  "detailed_findings": {
+    "platform_and_dependencies": {
+      "composer": {
+        "php_requirement": "^7.1.3",
+        "symfony": "4.2.* across components (EOL)",
+        "deprecated_packages": [
+          "symfony/web-server-bundle (dev)",
+          "swiftmailer/swiftmailer via symfony/swiftmailer-bundle",
+          "RegistryInterface type in Repository (removed in newer Doctrine/Symfony)"
+        ],
+        "constraints": "Tight 4.2.* pins will block upgrades. Replace with ^6.4 or ^7.0 across components. Remove polyfill replaces; let Composer manage."
+      },
+      "recommendations": [
+        "Upgrade PHP runtime to 8.2+.",
+        "Migrate to Symfony 6.4 LTS (or 7.x if compatible). Use symfony/skeleton and symfonycasts/upgrade recipes.",
+        "Replace Swiftmailer with symfony/mailer and symfony/notifier.",
+        "Remove symfony/web-server-bundle; use symfony cli or proper web server.",
+        "Audit Doctrine versions; move to doctrine/doctrine-bundles v2+, doctrine/dbal ^3, doctrine/orm ^2.16/^3 where feasible.",
+        "Use symfony/runtime and new bootstrap in public/index.php for modern kernel bootstrapping."
+      ]
+    },
+    "architecture_and_design": {
+      "observations": [
+        "Controllers contain business logic (ReportController, ParserController) and direct DB/file system access.",
+        "ParserController::__init and ReportController::__init use non-standard action names; magic-ish init patterns are brittle.",
+        "Entities are incomplete (Accounts empty) and likely not mapped to DB schema.",
+        "Templates mix static admin theme files under public/templates with Twig views in templates/; base.html.twig is minimal and unused by many views.",
+        "No service classes for parsing, validation, or reporting."
+      ],
+      "recommendations": [
+        "Adopt layered architecture: Controller -> Application Service -> Domain -> Infrastructure (Repositories/Filesystem).",
+        "Extract parsing logic to a dedicated service (App\\Service\\ReportParser) with DTOs and unit tests.",
+        "Create proper Doctrine entities (Account, AccountFile, Report/PublicRecord/Inquiry) with repositories.",
+        "Use Symfony Forms for all forms (accounts add/edit, uploads) with CSRF protection and validation constraints.",
+        "Normalize template structure: extend base.html.twig, define blocks, share layout (navbar/sidebar) via includes."
+      ]
+    },
+    "security": {
+      "authentication_authorization": [
+        "security.yaml uses encoders and anonymous: true. In Symfony 6+, use password_hashers and authenticators.",
+        "access_control forces ROLE_USER for most paths, but some routes (uploads, parsing) accept unauthenticated POST/GET data; confirm guards.",
+        "SecurityController extends deprecated Controller base and has empty logout handler."
+      ],
+      "input_output_sanitization": [
+        "Direct use of $_POST/$_GET/$_FILES throughout; bypasses Request, Form, and Validator components.",
+        "User-provided filenames are concatenated into paths (../misc) with urldecode(); path traversal risk.",
+        "MIME checking via mime_content_type only on listing, not on upload path; content-type spoofing risk.",
+        "Templates output lists without explicit escaping strategy; ensure autoescape is enabled and avoid raw output."
+      ],
+      "file_uploads_and_storage": [
+        "Uploads stored in ../misc outside public/ but still sibling to repo; ad-hoc storage.",
+        "No size limits, extension whitelist, antivirus scanning, or quarantine; missing unique naming and retention policy."
+      ],
+      "crypto_and_passwords": [
+        "bcrypt encoder works in 4.2; modern approach is native password_hasher config. Ensure password rehash on login.",
+        "No remember_me or session hardening shown; evaluate cookie security flags."
+      ],
+      "recommendations": [
+        "Move to Symfony Security new authenticator system; configure password_hashers and access controls per route/controller.",
+        "Refactor to use Request object and Forms with CSRF tokens.",
+        "Implement robust upload validation: max file size, extension whitelist (.html), server-side parsing limits, unique IDs, and store under var/uploads or cloud (S3) with presigned URLs.",
+        "Sanitize and normalize all paths; never trust user input for file paths.",
+        "Enable CSP, X-Frame-Options, X-Content-Type-Options via NelmioSecurityBundle or Symfony security headers.",
+        "Audit templates for unsafe outputs; ensure autoescape true and avoid raw filters."
+      ]
+    },
+    "data_layer": {
+      "observations": [
+        "Raw SQL throughout ReportController for CRUD on accounts and account_files.",
+        "No migrations present (doctrine:migrations config exists, but no migrations/ dir checked in).",
+        "Empty Accounts entity suggests mismatch between DB and ORM mapping.",
+        "User entity present and repository exists; uses deprecated RegistryInterface type."
+      ],
+      "recommendations": [
+        "Model domain with Doctrine entities and repositories. Replace raw SQL with QueryBuilder/Repository methods.",
+        "Create and commit Doctrine migrations; set up dev/test DB via .env and CI.",
+        "Use typed properties (PHP 7.4+/8) in entities; add Symfony Validator constraints.",
+        "Encrypt sensitive fields at rest if required (e.g., social last4) using doctrine-encrypt or custom attribute converters."
+      ]
+    },
+    "controllers_and_routing": {
+      "findings": [
+        "Routes map to unusual methods (__init, __init_raw) and CamelCase action names; prefer index(), show(), create(), edit(), etc.",
+        "IndexController::__init returns Response but controller extends AbstractController; never used via routes.",
+        "SecurityController extends deprecated Controller; should extend AbstractController and use dependency injection.",
+        "LuckyController is a leftover example; remove or move to examples/."
+      ],
+      "recommendations": [
+        "Rename methods to standard action names, add route attributes (Symfony 6) or annotations.",
+        "Use dependency-injected services (ReportParser, AccountService) in controllers.",
+        "Handle errors with proper exceptions and error pages; remove die/echo patterns."
+      ]
+    },
+    "templates_and_frontend": {
+      "findings": [
+        "Templates under templates/report do not extend base.html.twig; include static CSS path /templates/joli/css/theme-blue.css.",
+        "Public admin theme copied under public/templates/joli; consider using Webpack Encore or Asset component.",
+        "Inline forms lack Symfony Form rendering and CSRF fields."
+      ],
+      "recommendations": [
+        "Adopt a consistent layout: base template with blocks; child templates extend it.",
+        "Use Asset component or Webpack Encore for versioned assets.",
+        "Rebuild forms with Symfony Forms and Twig form themes."
+      ]
+    },
+    "testing_and_quality": {
+      "findings": [
+        "phpunit.xml.dist present; no tests/ directory found.",
+        "No static analysis or code style tools configured.",
+        "No CI pipeline defined."
+      ],
+      "recommendations": [
+        "Add tests/: unit (services, parsers), functional (WebTestCase for controllers), and integration (DB).",
+        "Introduce GitHub Actions CI: composer validate, lint, php-cs-fixer --dry-run, phpstan, phpunit matrix for PHP 8.2/8.3.",
+        "Adopt PHP-CS-Fixer or PHPCS with PSR-12; add phpstan.neon (level 8) or Psalm.",
+        "Enable Twig and YAML linters."
+      ]
+    },
+    "ops_and_configuration": {
+      "env_and_secrets": [
+        ".env present; ensure APP_SECRET, DB credentials via environment. Consider symfony/secrets for prod."
+      ],
+      "logging_and_monitoring": [
+        "Monolog configs exist; review handlers per env; add rotating_file and error-level segregation."
+      ],
+      "http_entrypoint": [
+        "public/index.php uses legacy bootstrap; migrate to symfony/runtime pattern on upgrade."
+      ],
+      "files_and_ignores": [
+        ".DS_Store tracked under templates; add .gitignore to exclude OS files and var/, vendor/ (if not committed), misc/ uploads."
+      ],
+      "deployment": [
+        "Add Dockerfile and docker-compose for local dev (PHP-FPM, Nginx, Postgres/MySQL).",
+        "Provide Makefile or Composer scripts for common tasks."
+      ]
+    }
+  },
+  "action_plan": {
+    "phase_0_quick_wins": [
+      "Add repository hygiene: .gitignore to exclude .DS_Store, var/, misc/, vendor/.",
+      "Remove dev-only sample controllers (LuckyController) or move to examples/.",
+      "Create docs/ with README, Architecture Overview, and SECURITY.md.",
+      "Introduce basic CI (composer validate, php -l, twig:lint, yaml:lint)."
+    ],
+    "phase_1_platform_upgrade": [
+      "Upgrade runtime to PHP 8.2/8.3.",
+      "Create a feature branch symfony-upgrade; update composer constraints to ^6.4 (or ^7.0) and run recipes.",
+      "Replace Swiftmailer with Mailer; update configs/templates.",
+      "Migrate Security to new authenticator system; replace encoders with password_hashers."
+    ],
+    "phase_2_refactor_architecture": [
+      "Introduce services: ReportParser, AccountService, FileStorageService.",
+      "Refactor controllers to thin actions using Request/Form/Validator.",
+      "Model Accounts and AccountFile entities with Doctrine; generate migrations.",
+      "Isolate parsing HTML into pure services with unit tests and timeouts."
+    ],
+    "phase_3_security_hardening": [
+      "Implement robust upload validation: file size limit, extension whitelist, store under var/uploads, random names, virus scan hook.",
+      "Add CSRF to all forms; enable SameSite=strict cookies; add security headers (CSP).",
+      "Audit routes access_control; protect upload/parse endpoints."
+    ],
+    "phase_4_quality_and_docs": [
+      "Add unit, functional, and integration tests; target 70%+ coverage for new code.",
+      "Add PHPStan level 8 and PHP-CS-Fixer to CI; fail on violations.",
+      "Document architecture (C4 diagrams), ADRs, and runbooks.",
+      "Add Observability: request/response logging, error tracking (Sentry)."
+    ],
+    "phase_5_frontend_cleanup": [
+      "Adopt base layout with blocks; ensure all report pages extend it.",
+      "Serve assets via encore or Asset component; remove public/templates duplication if unused."
+    ],
+    "success_metrics": [
+      "All dependencies on supported versions (Symfony 6.4+/PHP 8.2+).",
+      "0 critical/high issues on security scan (Symfony Insight/Composer audit).",
+      "CI green on phpstan level 8, phpunit, and coding standards.",
+      "Documented architecture and ops guides present in docs/.",
+      "Reduced controller LOC by 60% via service extraction."
+    ]
+  },
+  "file_specific_notes": [
+    {
+      "path": "src/Controller/ParserController.php",
+      "issues": [
+        "Monolithic ~800 LOC controller; heavy DOM parsing in action methods.",
+        "Uses __init and __init_raw methods; non-idiomatic naming.",
+        "Direct use of $_GET; file path concatenation and traversal risk.",
+        "Silent failure risks; no timeouts or size limits on HTML parsing."
+      ],
+      "suggestions": [
+        "Move parsing to App\\Service\\ReportParser with strict types and DTOs.",
+        "Limit input size and enforce schema; add tests with fixture HTML.",
+        "Rename actions to parse() and parseRaw() with proper routing attributes.",
+        "Use UploadedFile abstraction and temporary storage."
+      ]
+    },
+    {
+      "path": "src/Controller/ReportController.php",
+      "issues": [
+        "Directly handles file uploads and DB access in controller.",
+        "Raw SQL for accounts CRUD and file associations.",
+        "Validation helpers are simplistic and inconsistent (validate_name for email/phone)."
+      ],
+      "suggestions": [
+        "Use Symfony Forms with Validation constraints; different validators per field.",
+        "Create Account entity and AccountFile entity; use repositories.",
+        "Move upload logic to FileStorageService and AccountService."
+      ]
+    },
+    {
+      "path": "src/Entity/Accounts.php",
+      "issues": [
+        "Empty class; not mapped; likely dead code."
+      ],
+      "suggestions": [
+        "Implement or remove; create proper Doctrine entity with fields from accounts table."
+      ]
+    },
+    {
+      "path": "src/Entity/User.php",
+      "issues": [
+        "Implements Serializable (deprecated), use __serialize/__unserialize or no serialization for security.",
+        "No password rehash logic; roles hardcoded."
+      ],
+      "suggestions": [
+        "Use PasswordAuthenticatedUserInterface and UserInterface from Symfony 6.",
+        "Store roles array; migrate serialization; add unique constraints and validators."
+      ]
+    },
+    {
+      "path": "config/packages/security.yaml",
+      "issues": [
+        "Uses encoders and old firewall syntax; anonymous: true; coarse access control.",
+        "logout target configured; login route exists but no authenticator."
+      ],
+      "suggestions": [
+        "Migrate to authenticator-based security and password_hashers; define access controls per route."
+      ]
+    },
+    {
+      "path": "templates/report/*.twig",
+      "issues": [
+        "Do not extend base layout; hardcoded asset paths; forms without CSRF or Symfony Forms."
+      ],
+      "suggestions": [
+        "Refactor to use {% extends 'base.html.twig' %}, Asset component, and form rendering helpers."
+      ]
+    },
+    {
+      "path": "templates/.DS_Store",
+      "issues": [
+        "OS file committed."
+      ],
+      "suggestions": [
+        "Add .gitignore to exclude."
+      ]
+    }
+  ],
+  "proposed_directory_changes": [
+    "Create docs/ with: README.md, architecture.md, security.md, adr/0001-...md, runbooks/.",
+    "Create src/Service/ (ReportParser.php, AccountService.php, FileStorageService.php).",
+    "Create src/Entity/Account.php, src/Entity/AccountFile.php with proper mappings.",
+    "Add migrations/ and configure doctrine/migrations.",
+    "Add tests/ with Unit/, Functional/, Integration/ structure.",
+    "Move public/templates/joli to assets/ and build via Webpack Encore (optional).",
+    "Create var/uploads/ for incoming files; ensure it is gitignored."
+  ],
+  "ci_pipeline_suggestion": {
+    "tool": "GitHub Actions",
+    "workflow": "php.yml",
+    "steps": [
+      "checkout",
+      "setup-php 8.2 with extensions",
+      "composer install --prefer-dist --no-progress --no-scripts",
+      "composer validate --strict",
+      "php -l on src/ and config/",
+      "bin/console lint:twig templates/",
+      "bin/console lint:yaml config/",
+      "php-cs-fixer --dry-run",
+      "phpstan analyse",
+      "phpunit"
+    ]
+  },
+  "upgrade_path_notes": [
+    "Symfony 4.2 -> 4.4 LTS -> 5.4 LTS -> 6.4 LTS recommended stepping stones; using rector/rector and symfony/upgrade recipes can ease migration.",
+    "Replace Controller base class with AbstractController; replace RegistryInterface with ManagerRegistry.",
+    "Adopt attributes for routing (#[Route]) and DI where appropriate.",
+    "Replace Swiftmailer with Mailer and update any templates using swift-specific features."
+  ],
+  "risk_register": [
+    {
+      "risk": "Breaking changes during upgrade",
+      "mitigation": "Branch strategy, incremental upgrades, robust test suite, deploy to staging first."
+    },
+    {
+      "risk": "Parsing fragility due to upstream HTML format changes",
+      "mitigation": "Define schema/contract, add parsing fixtures and snapshot tests; fail gracefully with actionable errors."
+    },
+    {
+      "risk": "Security gaps during refactor",
+      "mitigation": "Add security headers early, enforce CSRF on forms, audit endpoints, add automated security scanning."
+    }
+  ]
+}
