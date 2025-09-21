@@ -54,10 +54,10 @@
             ]);
         }
 
-        public function Accounts() {
+        public function Accounts(ManagerRegistry $doctrine) {
 
             return $this->render("report/accounts.html.twig", [
-                "accounts"    =>  $this->get_accounts(),
+                "accounts"    =>  $this->get_accounts($doctrine),
             ]);
         }
 
@@ -136,34 +136,35 @@
             }
         }
 
-        public function edit_Accounts() {
+        public function edit_Accounts(Request $request, ManagerRegistry $doctrine) {
 
-            $aid = isset($_GET['aid']) ? filter_var($_GET['aid'], FILTER_SANITIZE_STRING) : null;
+            $aid = $request->query->get('aid');
 
-
-            
             $messages = array();
             $errors = array();
 
             $parameters = array(
-                "first_name"                =>  isset($_POST['first_name']) ? filter_var($_POST['first_name'], FILTER_SANITIZE_STRING) : "",
-                "last_name"                 =>  isset($_POST['last_name']) ? filter_var($_POST['last_name'], FILTER_SANITIZE_STRING) : "",
-                "email"                     =>  isset($_POST['email']) ? filter_var($_POST['email'], FILTER_SANITIZE_STRING) : "",
-                "phone"                     =>  isset($_POST['phone']) ? filter_var($_POST['phone'], FILTER_SANITIZE_STRING) : "",
-                "address1"                  =>  isset($_POST['address1']) ? filter_var($_POST['address1'], FILTER_SANITIZE_STRING) : "",
-                "address2"                  =>  isset($_POST['address2']) ? filter_var($_POST['address2'], FILTER_SANITIZE_STRING) : "",
-                "city"                      =>  isset($_POST['city']) ? filter_var($_POST['city'], FILTER_SANITIZE_STRING) : "",
-                "state"                     =>  isset($_POST['state']) ? filter_var($_POST['state'], FILTER_SANITIZE_STRING) : "",
-                "zip"                       =>  isset($_POST['zip']) ? filter_var($_POST['zip'], FILTER_SANITIZE_STRING) : "",
-                "social"                    =>  isset($_POST['social']) ? filter_var($_POST['social'], FILTER_SANITIZE_STRING) : "",
-                "credit_company"            =>  isset($_POST['credit_company']) ? filter_var($_POST['credit_company'], FILTER_SANITIZE_STRING) : "",
-                "credit_company_user"       =>  isset($_POST['credit_company_user']) ? filter_var($_POST['credit_company_user'], FILTER_SANITIZE_STRING) : "",
-                "credit_company_password"   =>  isset($_POST['credit_company_password']) ? filter_var($_POST['credit_company_password'], FILTER_SANITIZE_STRING) : "",
-                "credit_company_code"       =>  isset($_POST['credit_company_code']) ? filter_var($_POST['credit_company_code'], FILTER_SANITIZE_STRING) : "",
+                "first_name"                =>  $request->request->get('first_name', ""),
+                "last_name"                 =>  $request->request->get('last_name', ""),
+                "email"                     =>  $request->request->get('email', ""),
+                "phone"                     =>  $request->request->get('phone', ""),
+                "address1"                  =>  $request->request->get('address1', ""),
+                "address2"                  =>  $request->request->get('address2', ""),
+                "city"                      =>  $request->request->get('city', ""),
+                "state"                     =>  $request->request->get('state', ""),
+                "zip"                       =>  $request->request->get('zip', ""),
+                "social"                    =>  $request->request->get('social', ""),
+                "credit_company"            =>  $request->request->get('credit_company', ""),
+                "credit_company_user"       =>  $request->request->get('credit_company_user', ""),
+                "credit_company_password"   =>  $request->request->get('credit_company_password', ""),
+                "credit_company_code"       =>  $request->request->get('credit_company_code', ""),
             );
 
-            if(isset($_POST['first_name']) && isset($_POST['first_name']) && isset($_POST['email']) && isset($_POST['phone']) && isset($_POST['address1']) && isset($_POST['address2']) && isset($_POST['city']) && isset($_POST['state']) && isset($_POST['zip']) && isset($_POST['social']) && isset($_POST['credit_company']) && isset($_POST['credit_company_user']) && isset($_POST['credit_company_password']) && isset($_POST['credit_company_code'])) {
-                
+            if ($request->isMethod('POST')) {
+
+                if (!$this->isCsrfTokenValid('account_edit_form', $request->request->get('_token'))) {
+                    $errors[] = "Invalid CSRF token.";
+                }
 
                 if($this->validate_name($parameters['first_name']) == false) {
                     $errors[] = "Invalid First Name.";
@@ -191,27 +192,27 @@
                 }
 
                 if(count($errors) == 0) {
-                    // Get Connection
-                    $em = $this->getDoctrine()->getManager();
-                    // Validate all otehr values
+                    $em = $doctrine->getManager();
+                    $conn = $em->getConnection();
                     $query = "UPDATE accounts SET first_name = :first_name, last_name = :last_name, email = :email, phone = :phone, address1 = :address1, address2 = :address2, city = :city, state = :state, zip = :zip, social = :social, credit_company = :credit_company, credit_company_user = :credit_company_user, credit_company_password = :credit_company_password, credit_company_code = :credit_company_code WHERE aid = :aid LIMIT 1";
-                    $statement = $em->getConnection()->prepare($query);
-                    $statement->bindValue("first_name", $parameters['first_name']);
-                    $statement->bindValue("last_name", $parameters['last_name']);
-                    $statement->bindValue("email", $parameters['email']);
-                    $statement->bindValue("phone", $parameters['phone']);
-                    $statement->bindValue("address1", $parameters['address1']);
-                    $statement->bindValue("address2", $parameters['address2']);
-                    $statement->bindValue("city", $parameters['city']);
-                    $statement->bindValue("state", $parameters['state']);
-                    $statement->bindValue("zip", $parameters['zip']);
-                    $statement->bindValue("social", $parameters['social']);
-                    $statement->bindValue("credit_company", $parameters['credit_company']);
-                    $statement->bindValue("credit_company_user", $parameters['credit_company_user']);
-                    $statement->bindValue("credit_company_password", $parameters['credit_company_password']);
-                    $statement->bindValue("credit_company_code", $parameters['credit_company_code']);
-                    $statement->bindValue("aid", $aid);
-                    $affected = $statement->executeStatement();
+                    $statement = $conn->prepare($query);
+                    $affected = $statement->executeStatement([
+                        "first_name" => $parameters['first_name'],
+                        "last_name" => $parameters['last_name'],
+                        "email" => $parameters['email'],
+                        "phone" => $parameters['phone'],
+                        "address1" => $parameters['address1'],
+                        "address2" => $parameters['address2'],
+                        "city" => $parameters['city'],
+                        "state" => $parameters['state'],
+                        "zip" => $parameters['zip'],
+                        "social" => $parameters['social'],
+                        "credit_company" => $parameters['credit_company'],
+                        "credit_company_user" => $parameters['credit_company_user'],
+                        "credit_company_password" => $parameters['credit_company_password'],
+                        "credit_company_code" => $parameters['credit_company_code'],
+                        "aid" => $aid,
+                    ]);
                     if($affected >= 0) {
                         $messages[] = "Account sucessfully udpated!";
                     } else {
@@ -221,7 +222,7 @@
             }
 
             if($aid) {
-                $account_info = $this->get_accounts($aid);
+                $account_info = $this->get_accounts($doctrine, $aid);
 
                 if(count($account_info) == 0) {
                     return $this->render("report/accounts-view-not-found.html.twig", []);
@@ -237,30 +238,33 @@
             ]);
         }
 
-        public function add_Accounts() {
+        public function add_Accounts(Request $request, ManagerRegistry $doctrine) {
 
             $messages = array();
             $errors = array();
 
             $parameters = array(
-                "first_name"                =>  isset($_POST['first_name']) ? filter_var($_POST['first_name'], FILTER_SANITIZE_STRING) : "",
-                "last_name"                 =>  isset($_POST['last_name']) ? filter_var($_POST['last_name'], FILTER_SANITIZE_STRING) : "",
-                "email"                     =>  isset($_POST['email']) ? filter_var($_POST['email'], FILTER_SANITIZE_STRING) : "",
-                "phone"                     =>  isset($_POST['phone']) ? filter_var($_POST['phone'], FILTER_SANITIZE_STRING) : "",
-                "address1"                  =>  isset($_POST['address1']) ? filter_var($_POST['address1'], FILTER_SANITIZE_STRING) : "",
-                "address2"                  =>  isset($_POST['address2']) ? filter_var($_POST['address2'], FILTER_SANITIZE_STRING) : "",
-                "city"                      =>  isset($_POST['city']) ? filter_var($_POST['city'], FILTER_SANITIZE_STRING) : "",
-                "state"                     =>  isset($_POST['state']) ? filter_var($_POST['state'], FILTER_SANITIZE_STRING) : "",
-                "zip"                       =>  isset($_POST['zip']) ? filter_var($_POST['zip'], FILTER_SANITIZE_STRING) : "",
-                "social"                    =>  isset($_POST['social']) ? filter_var($_POST['social'], FILTER_SANITIZE_STRING) : "",
-                "credit_company"            =>  isset($_POST['credit_company']) ? filter_var($_POST['credit_company'], FILTER_SANITIZE_STRING) : "",
-                "credit_company_user"       =>  isset($_POST['credit_company_user']) ? filter_var($_POST['credit_company_user'], FILTER_SANITIZE_STRING) : "",
-                "credit_company_password"   =>  isset($_POST['credit_company_password']) ? filter_var($_POST['credit_company_password'], FILTER_SANITIZE_STRING) : "",
-                "credit_company_code"       =>  isset($_POST['credit_company_code']) ? filter_var($_POST['credit_company_code'], FILTER_SANITIZE_STRING) : "",
+                "first_name"                =>  $request->request->get('first_name', ""),
+                "last_name"                 =>  $request->request->get('last_name', ""),
+                "email"                     =>  $request->request->get('email', ""),
+                "phone"                     =>  $request->request->get('phone', ""),
+                "address1"                  =>  $request->request->get('address1', ""),
+                "address2"                  =>  $request->request->get('address2', ""),
+                "city"                      =>  $request->request->get('city', ""),
+                "state"                     =>  $request->request->get('state', ""),
+                "zip"                       =>  $request->request->get('zip', ""),
+                "social"                    =>  $request->request->get('social', ""),
+                "credit_company"            =>  $request->request->get('credit_company', ""),
+                "credit_company_user"       =>  $request->request->get('credit_company_user', ""),
+                "credit_company_password"   =>  $request->request->get('credit_company_password', ""),
+                "credit_company_code"       =>  $request->request->get('credit_company_code', ""),
             );
 
-            if(isset($_POST['first_name']) && isset($_POST['first_name']) && isset($_POST['email']) && isset($_POST['phone']) && isset($_POST['address1']) && isset($_POST['address2']) && isset($_POST['city']) && isset($_POST['state']) && isset($_POST['zip']) && isset($_POST['social']) && isset($_POST['credit_company']) && isset($_POST['credit_company_user']) && isset($_POST['credit_company_password']) && isset($_POST['credit_company_code'])) {
-                
+            if ($request->isMethod('POST')) {
+
+                if (!$this->isCsrfTokenValid('account_add_form', $request->request->get('_token'))) {
+                    $errors[] = "Invalid CSRF token.";
+                }
 
                 if($this->validate_name($parameters['first_name']) == false) {
                     $errors[] = "Invalid First Name.";
@@ -288,36 +292,33 @@
                 }
 
                 if(count($errors) == 0) {
-                    // Get Connection
-                    $em = $this->getDoctrine()->getManager();
+                    $em = $doctrine->getManager();
+                    $conn = $em->getConnection();
                     // Check to see if email already exists
                     $query = "SELECT COUNT(*) `rows` FROM accounts WHERE email = :email";
-                    $statement = $em->getConnection()->prepare($query);
-                    $statement->bindValue("email", $parameters['email']);
-                    $result = $statement->executeQuery();
-                    $rows = $result->fetchAllAssociative();
+                    $rows = $conn->prepare($query)->executeQuery(["email" => $parameters['email']])->fetchAllAssociative();
 
                     if($rows[0]['rows'] > 0) {
                         $errors[] = "Email address already exists";
                     } else {
-                        // Validate all otehr values
                         $query = "INSERT INTO accounts SET first_name = :first_name, last_name = :last_name, email = :email, phone = :phone, address1 = :address1, address2 = :address2, city = :city, state = :state, zip = :zip, social = :social, credit_company = :credit_company, credit_company_user = :credit_company_user, credit_company_password = :credit_company_password, credit_company_code = :credit_company_code, created = NOW()";
-                        $statement = $em->getConnection()->prepare($query);
-                        $statement->bindValue("first_name", $parameters['first_name']);
-                        $statement->bindValue("last_name", $parameters['last_name']);
-                        $statement->bindValue("email", $parameters['email']);
-                        $statement->bindValue("phone", $parameters['phone']);
-                        $statement->bindValue("address1", $parameters['address1']);
-                        $statement->bindValue("address2", $parameters['address2']);
-                        $statement->bindValue("city", $parameters['city']);
-                        $statement->bindValue("state", $parameters['state']);
-                        $statement->bindValue("zip", $parameters['zip']);
-                        $statement->bindValue("social", $parameters['social']);
-                        $statement->bindValue("credit_company", $parameters['credit_company']);
-                        $statement->bindValue("credit_company_user", $parameters['credit_company_user']);
-                        $statement->bindValue("credit_company_password", $parameters['credit_company_password']);
-                        $statement->bindValue("credit_company_code", $parameters['credit_company_code']);
-                        if($statement->executeStatement() > 0) {
+                        $affected = $conn->prepare($query)->executeStatement([
+                            "first_name" => $parameters['first_name'],
+                            "last_name" => $parameters['last_name'],
+                            "email" => $parameters['email'],
+                            "phone" => $parameters['phone'],
+                            "address1" => $parameters['address1'],
+                            "address2" => $parameters['address2'],
+                            "city" => $parameters['city'],
+                            "state" => $parameters['state'],
+                            "zip" => $parameters['zip'],
+                            "social" => $parameters['social'],
+                            "credit_company" => $parameters['credit_company'],
+                            "credit_company_user" => $parameters['credit_company_user'],
+                            "credit_company_password" => $parameters['credit_company_password'],
+                            "credit_company_code" => $parameters['credit_company_code'],
+                        ]);
+                        if($affected > 0) {
                             $messages[] = "Account sucessfully added!";
                         }
                     }
@@ -333,22 +334,20 @@
 
 
 
-        private function get_accounts($aid = null) {
+        private function get_accounts(ManagerRegistry $doctrine, $aid = null) {
 
             if(is_null($aid)) {
                 $query = "SELECT * FROM accounts ORDER BY last_name DESC";
+                $params = [];
             } else {
                 $query = "SELECT * FROM accounts WHERE aid = :aid LIMIT 1";
+                $params = ["aid" => $aid];
             }
 
-            $em = $this->getDoctrine()->getManager();
-            $statement = $em->getConnection()->prepare($query);
+            $em = $doctrine->getManager();
+            $conn = $em->getConnection();
 
-            if(!is_null($aid)) {
-                $statement->bindValue("aid", $aid);
-            }
-
-            return $statement->executeQuery()->fetchAllAssociative();
+            return $conn->prepare($query)->executeQuery($params)->fetchAllAssociative();
 
         }
 

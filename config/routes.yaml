@@ -9,12 +9,9 @@ app_root:
         path: /accounts
         permanent: true
 
-app_upload_redirect:
-    path: /upload
-    defaults:
-        _controller: 'Symfony\Bundle\FrameworkBundle\Controller\RedirectController::urlRedirect'
-        path: /accounts
-        permanent: true
+app_upload:
+  path: /upload
+  controller: App\Controller\ReportController::__init
 
 app_parse_html:
   path: /html-report
