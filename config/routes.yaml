@@ -48,3 +48,11 @@ app_logout:
 app_dashboard:
   path: /dashboard
   controller: App\Controller\ReportController::dashboard
+
+app_simple_audit:
+  path: /simple-audit
+  controller: App\Controller\AuditController::view
+
+app_simple_audit_pdf:
+  path: /simple-audit.pdf
+  controller: App\Controller\AuditController::pdf
