@@ -1,0 +1,222 @@
+{% set is_pdf = pdf_export is defined and pdf_export %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Simple Audit - {{ account.first_name }} {{ account.last_name }}</title>
+    <style>
+        body { font-family: Arial, Helvetica, sans-serif; color: #333; margin: 24px; }
+        h1, h2, h3 { color: #0056b3; margin: 0 0 8px; }
+        h1 { font-size: 22px; }
+        h2 { font-size: 18px; margin-top: 16px; }
+        h3 { font-size: 15px; margin-top: 12px; }
+        p, li, td, th { font-size: 12px; line-height: 1.5; }
+        .header { display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #eee; padding-bottom: 8px; margin-bottom: 16px; }
+        .brand { display: flex; align-items: center; gap: 12px; }
+        .brand img { height: 36px; }
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .card { border: 1px solid #e3e3e3; border-radius: 6px; padding: 12px; background: #fff; }
+        .muted { color: #666; }
+        table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+        th, td { border: 1px solid #e5e5e5; padding: 8px; text-align: left; }
+        th { background: #f6f8fa; }
+        .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        .kpi { border: 1px solid #e3e3e3; border-radius: 6px; padding: 10px; text-align: center; }
+        .kpi .label { font-size: 11px; color: #666; }
+        .kpi .value { font-size: 18px; font-weight: bold; color: #222; }
+        .footer { margin-top: 16px; padding-top: 10px; border-top: 1px solid #eee; font-size: 11px; color: #777; }
+        .cta { margin-top: 12px; padding: 10px; background: #f0f7ff; border: 1px solid #d6e9ff; border-radius: 6px; }
+        .right { text-align: right; }
+        .btn { display: inline-block; padding: 8px 12px; border-radius: 4px; background: #0056b3; color: #fff; text-decoration: none; }
+        .btn:hover { background: #00479a; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="brand">
+            <img src="images/logo-new.png" alt="Logo">
+            <div>
+                <h1>Simple Audit</h1>
+                <div class="muted">Client: {{ account.first_name }} {{ account.last_name }}</div>
+            </div>
+        </div>
+        {% if not is_pdf %}
+            <div class="right">
+                <a class="btn" href="/simple-audit.pdf?file={{ report_file|url_encode }}">Download PDF</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="kpis">
+        <div class="kpi">
+            <div class="label">Equifax Score</div>
+            <div class="value">{{ client_data.equifax.credit_score }}</div>
+        </div>
+        <div class="kpi">
+            <div class="label">TransUnion Score</div>
+            <div class="value">{{ client_data.trans_union.credit_score }}</div>
+        </div>
+        <div class="kpi">
+            <div class="label">Experian Score</div>
+            <div class="value">{{ client_data.experian.credit_score }}</div>
+        </div>
+        <div class="kpi">
+            <div class="label">Report Date</div>
+            <div class="value">{{ client_data.trans_union.report_data }}</div>
+        </div>
+    </div>
+
+    <div class="grid" style="margin-top: 12px;">
+        <div class="card">
+            <h2>Negative Items</h2>
+            <p>Total derogatory items: <strong>{{ derogatory_accounts.total }}</strong></p>
+            {% if derogatory_accounts.accounts|length > 0 %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Account</th>
+                            <th>Issue</th>
+                            <th>Dates (TU/EX/EQ)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for item in derogatory_accounts.accounts|slice(0,6) %}
+                        <tr>
+                            <td>{{ item.account }}</td>
+                            <td>{{ item.unique_status }}</td>
+                            <td>
+                                {{ item.trans_union_account_date }} / {{ item.experian_account_date }} / {{ item.equifax_account_date }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                {% if derogatory_accounts.accounts|length > 6 %}
+                    <p class="muted">Showing first 6 items. See full report for details.</p>
+                {% endif %}
+            {% else %}
+                <p>No derogatory items found.</p>
+            {% endif %}
+        </div>
+
+        <div class="card">
+            <h2>Credit Utilization</h2>
+            <table>
+                <tbody>
+                <tr>
+                    <td>Total Revolving Limit</td>
+                    <td>${{ credit_info.total_limit }}</td>
+                </tr>
+                <tr>
+                    <td>Total Revolving Balance</td>
+                    <td>${{ credit_info.total_balance }}</td>
+                </tr>
+                <tr>
+                    <td>Overall Utilization</td>
+                    <td>{{ credit_info.total_percent }}%</td>
+                </tr>
+                <tr>
+                    <td>Equifax</td>
+                    <td>{{ credit_info.equifax_percent }}%</td>
+                </tr>
+                <tr>
+                    <td>TransUnion</td>
+                    <td>{{ credit_info.trans_union_percent }}%</td>
+                </tr>
+                <tr>
+                    <td>Experian</td>
+                    <td>{{ credit_info.experian_percent }}%</td>
+                </tr>
+                </tbody>
+            </table>
+            <p class="muted">Tip: Aim to keep utilization under 25% on each card and overall.</p>
+        </div>
+
+        <div class="card">
+            <h2>Inquiries</h2>
+            <p>Total inquiries (2 years): <strong>{{ client_data.equifax.inquiries + client_data.trans_union.inquiries + client_data.experian.inquiries }}</strong></p>
+            {% if inquiry_accounts.total > 0 %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Business</th>
+                            <th>Type</th>
+                            <th>Date</th>
+                            <th>Bureau</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for row in inquiry_accounts.accounts|slice(0,6) %}
+                        <tr>
+                            {% for v in row %}
+                                <td>{{ v }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No recent inquiries found.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="grid" style="margin-top: 12px;">
+        <div class="card">
+            <h2>Public Records</h2>
+            <p>Total public records: <strong>{{ public_records.total }}</strong></p>
+            {% if public_records.records|length > 0 %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Filed (TU/EX/EQ)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for rec in public_records.records|slice(0,6) %}
+                        <tr>
+                            <td>{{ rec.type }}</td>
+                            <td>{{ rec.status }}</td>
+                            <td>{{ rec.trans_union_files }} / {{ rec.experian_filed }} / {{ rec.equifax_filed }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No public records found.</p>
+            {% endif %}
+        </div>
+
+        <div class="card">
+            <h2>Next Steps</h2>
+            <ol>
+                <li>Dispute derogatory items with bureaus, prioritizing most recent and severe.</li>
+                <li>Reduce revolving utilization below 25% (ideally under 10%).</li>
+                <li>Avoid new hard inquiries during the repair process.</li>
+                <li>Keep existing accounts open and pay on time.</li>
+            </ol>
+            <div class="cta">
+                To proceed, upload your latest credit report and schedule a follow-up to review updates. 
+                {% if not is_pdf %}Use the full report at <a href="/html-report?file={{ report_file|url_encode }}">Credit Analysis Report</a>.{% endif %}
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Contact</h2>
+            <p class="muted">
+                Prepared for {{ account.first_name }} {{ account.last_name }}.<br>
+                This Simple Audit is a summary; see full report for detailed analysis.
+            </p>
+        </div>
+    </div>
+
+    <div class="footer">
+        Generated by the system on {{ \"now\"|date(\"Y-m-d H:i\") }}.
+    </div>
+
+</body>
+</html>

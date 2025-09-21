@@ -1,0 +1,4 @@
+framework:
+    mailer:
+        # Disable actual delivery in tests
+        dsn: 'null://null'
