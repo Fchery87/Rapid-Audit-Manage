@@ -53,3 +53,18 @@
         </ul>
     {%- endif -%}
 {%- endblock %}
+
+{# Field-specific widgets with input-group icons for AccountType #}
+{% block _account_email_widget -%}
+    <div class="input-group">
+        <span class="input-group-addon"><span class="fa fa-envelope"></span></span>
+        {{- parent() -}}
+    </div>
+{%- endblock %}
+
+{% block _account_phone_widget -%}
+    <div class="input-group">
+        <span class="input-group-addon"><span class="fa fa-phone"></span></span>
+        {{- parent() -}}
+    </div>
+{%- endblock %}
