@@ -172,12 +172,23 @@
                     <div class="panel panel-default">
                         <div class="panel-body">
                             <h3>Reports</h3>
+                            {% if files|length > 0 %}
+                                <div style="margin: 8px 0 12px;">
+                                    <a class="btn btn-primary" href="/simple-audit?file={{ files[0].filename }}" style="margin-right:8px;">Simple Audit (latest)</a>
+                                    <a class="btn btn-default" href="/simple-audit.pdf?file={{ files[0].filename }}" target="_blank">Download PDF</a>
+                                </div>
+                            {% else %}
+                                <div class="alert alert-info" style="margin: 8px 0 12px;">
+                                    Upload a report to generate a Simple Audit for this account.
+                                </div>
+                            {% endif %}
                             <table  class="table table-striped">
                                 <thead>
                                     <tr>
                                         <th>#</th>
                                         <th>File</th>
                                         <th>Added</th>
+                                        <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -187,10 +198,14 @@
                                                 <td>{{ file.fid }}</td>
                                                 <td><a href="/html-report?file={{ file.filename }}" target="_blank">{{ file.filename }}</a></td>
                                                 <td>{{ file.added }}</td>
+                                                <td>
+                                                    <a href="/simple-audit?file={{ file.filename }}" class="btn btn-xs btn-primary" style="margin-right:6px;">Simple Audit</a>
+                                                    <a href="/simple-audit.pdf?file={{ file.filename }}" class="btn btn-xs btn-default" target="_blank">PDF</a>
+                                                </td>
                                             </tr>
                                         {% endfor %}
                                     {% else %}
-                                        <tr><td colspan="3">No Reports Found!</td></tr>
+                                        <tr><td colspan="4">No Reports Found!</td></tr>
                                     {% endif %}
                                 </tbody>
                             </table>
