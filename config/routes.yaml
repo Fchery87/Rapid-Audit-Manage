@@ -5,39 +5,49 @@
 app_root:
     path: /
     defaults:
-        _controller: FrameworkBundle:Redirect:urlRedirect
+        _controller: 'Symfony\Bundle\FrameworkBundle\Controller\RedirectController::urlRedirect'
         path: /accounts
         permanent: true
+
 app_upload_redirect:
     path: /upload
     defaults:
-        _controller: FrameworkBundle:Redirect:urlRedirect
+        _controller: 'Symfony\Bundle\FrameworkBundle\Controller\RedirectController::urlRedirect'
         path: /accounts
         permanent: true
+
 app_parse_html:
   path: /html-report
   controller: App\Controller\ParserController::__init
+
 app_parse_html_dev:
   path: /parse-html-raw
   controller: App\Controller\ParserController::__init_raw
+
 app_account_list:
   path: /accounts
   controller: App\Controller\ReportController::Accounts
+
 app_account_add:
   path: /accounts-add
   controller: App\Controller\ReportController::add_Accounts
+
 app_account_view:
   path: /accounts-view
   controller: App\Controller\ReportController::view_Accounts
+
 app_account_edit:
   path: /accounts-edit
   controller: App\Controller\ReportController::edit_Accounts
+
 app_login:
   path: /login
   controller: App\Controller\SecurityController::login
+
 app_logout:
   path: /logout
   controller: App\Controller\SecurityController::logout
+
 app_dashboard:
   path: /dashboard
   controller: App\Controller\ReportController::dashboard

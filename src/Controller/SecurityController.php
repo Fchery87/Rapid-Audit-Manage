@@ -2,12 +2,12 @@
 
 namespace App\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 //use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
-class SecurityController extends Controller
+class SecurityController extends AbstractController
 {
     public function login(Request $request, AuthenticationUtils $utils)
     {
@@ -22,6 +22,6 @@ class SecurityController extends Controller
 
     public function logout()
     {
-        
+        // Controller can be blank: it will be intercepted by the logout key on your firewall
     }
 }

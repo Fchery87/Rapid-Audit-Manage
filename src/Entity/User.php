@@ -4,11 +4,12 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
  */
-class User implements UserInterface, \Serializable
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     /**
      * @ORM\Id()
@@ -37,6 +38,12 @@ class User implements UserInterface, \Serializable
         return $this->id;
     }
 
+    public function getUserIdentifier(): string
+    {
+        return (string) $this->username;
+    }
+
+    // Kept for BC where referenced in code
     public function getUsername(): ?string
     {
         return $this->username;
@@ -73,34 +80,15 @@ class User implements UserInterface, \Serializable
         return $this;
     }
 
-    public function getRoles()
+    public function getRoles(): array
     {
         return [
-            'ROLE_USER'
+            'ROLE_USER',
         ];
     }
 
-    public function getSalt() { }
-
-    public function eraseCredentials() { }
-
-    public function serialize()
+    public function eraseCredentials(): void
     {
-        return serialize([
-            $this->id,
-            $this->username,
-            $this->email,
-            $this->password
-        ]);
-    }
-
-    public function unserialize($string)
-    {
-        list(
-            $this->id,
-            $this->username,
-            $this->email,
-            $this->password
-        ) = unserialize($string, ["allow_classes" => false]);
+        // If you store any temporary, sensitive data on the user, clear it here
     }
 }

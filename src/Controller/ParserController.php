@@ -111,8 +111,8 @@
                 $query = "SELECT first_name, last_name FROM accounts a INNER JOIN account_files f WHERE f.filename = :filename AND f.aid = a.aid";
                 $statement = $em->getConnection()->prepare($query);
                 $statement->bindValue("filename", $file);
-                $statement->execute();
-                $rows = $statement->fetchAll();
+                $result = $statement->executeQuery();
+                $rows = $result->fetchAllAssociative();
             }
 
             return($rows[0]);

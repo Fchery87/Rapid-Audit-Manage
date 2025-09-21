@@ -73,8 +73,8 @@
                 $query = "SELECT * FROM accounts WHERE aid = :aid LIMIT 1";
                 $statement = $em->getConnection()->prepare($query);
                 $statement->bindValue("aid", $aid);
-                $statement->execute();
-                $rows = $statement->fetchAll();
+                $result = $statement->executeQuery();
+                $rows = $result->fetchAllAssociative();
 
                 if(count($rows) > 0) {
 
@@ -102,8 +102,8 @@
                             $statement = $em->getConnection()->prepare($query);
                             $statement->bindValue("aid", $aid);
                             $statement->bindValue("filename", $filename);
-                            $statement->execute();
-                            $file_check = $statement->fetchAll();
+                            $result = $statement->executeQuery();
+                            $file_check = $result->fetchAllAssociative();
 
                             if(count($file_check) == 0) {
 
@@ -112,7 +112,7 @@
                                     $statement = $em->getConnection()->prepare($query);
                                     $statement->bindValue("aid", $aid);
                                     $statement->bindValue("filename", $filename);
-                                    $statement->execute();
+                                    $statement->executeStatement();
 
                                     $messages[] = "Upload successful!";
                                 } else {
@@ -128,8 +128,8 @@
                     $query = "SELECT * FROM account_files WHERE aid = :aid ORDER BY added DESC";
                     $statement = $em->getConnection()->prepare($query);
                     $statement->bindValue("aid", $aid);
-                    $statement->execute();
-                    $files = $statement->fetchAll();
+                    $result = $statement->executeQuery();
+                    $files = $result->fetchAllAssociative();
 
                     return $this->render("report/accounts-view.html.twig", [
                         "account_info"  =>  $rows[0],
@@ -178,7 +178,6 @@
             if(isset($_POST['first_name']) && isset($_POST['first_name']) && isset($_POST['email']) && isset($_POST['phone']) && isset($_POST['address1']) && isset($_POST['address2']) && isset($_POST['city']) && isset($_POST['state']) && isset($_POST['zip']) && isset($_POST['social']) && isset($_POST['credit_company']) && isset($_POST['credit_company_user']) && isset($_POST['credit_company_password']) && isset($_POST['credit_company_code'])) {
                 
 
-
                 if($this->validate_name($parameters['first_name']) == false) {
                     $errors[] = "Invalid First Name.";
                 }
@@ -225,7 +224,8 @@
                     $statement->bindValue("credit_company_password", $parameters['credit_company_password']);
                     $statement->bindValue("credit_company_code", $parameters['credit_company_code']);
                     $statement->bindValue("aid", $aid);
-                    if($statement->execute()) {
+                    $affected = $statement->executeStatement();
+                    if($affected >= 0) {
                         $messages[] = "Account sucessfully udpated!";
                     } else {
                         $errors[] = "Failed to update record. Contact admin";
@@ -275,7 +275,6 @@
             if(isset($_POST['first_name']) && isset($_POST['first_name']) && isset($_POST['email']) && isset($_POST['phone']) && isset($_POST['address1']) && isset($_POST['address2']) && isset($_POST['city']) && isset($_POST['state']) && isset($_POST['zip']) && isset($_POST['social']) && isset($_POST['credit_company']) && isset($_POST['credit_company_user']) && isset($_POST['credit_company_password']) && isset($_POST['credit_company_code'])) {
                 
 
-
                 if($this->validate_name($parameters['first_name']) == false) {
                     $errors[] = "Invalid First Name.";
                 }
@@ -308,8 +307,8 @@
                     $query = "SELECT COUNT(*) `rows` FROM accounts WHERE email = :email";
                     $statement = $em->getConnection()->prepare($query);
                     $statement->bindValue("email", $parameters['email']);
-                    $statement->execute();
-                    $rows = $statement->fetchAll();
+                    $result = $statement->executeQuery();
+                    $rows = $result->fetchAllAssociative();
 
                     if($rows[0]['rows'] > 0) {
                         $errors[] = "Email address already exists";
@@ -331,7 +330,7 @@
                         $statement->bindValue("credit_company_user", $parameters['credit_company_user']);
                         $statement->bindValue("credit_company_password", $parameters['credit_company_password']);
                         $statement->bindValue("credit_company_code", $parameters['credit_company_code']);
-                        if($statement->execute()) {
+                        if($statement->executeStatement() > 0) {
                             $messages[] = "Account sucessfully added!";
                         }
                     }
@@ -362,8 +361,7 @@
                 $statement->bindValue("aid", $aid);
             }
 
-            $statement->execute();
-            return $statement->fetchAll();
+            return $statement->executeQuery()->fetchAllAssociative();
 
         }
 
