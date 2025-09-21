@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Add Account</title>
+
+    <link rel="stylesheet" href="/templates/joli/css/theme-blue.css">
+
+  </head>
+  <body>
+    <div class="page-container" style="height: 100vh;">
+        <div class="page-sidebar page-sidebar-fixed scroll">
+            <ul class="x-navigation">
+                <li class="xn-logo">
+                    <a href="/">Top Tier</a>
+                    <a href="#" class="x-navigation-control"></a>
+                </li>
+                <li class="xn-title">
+                    Navigation
+                </li>
+                <li>
+                    <a href="/dashboard">
+                        <span class="fa fa-desktop"></span>
+                        <span class="xn-text">Dashboard</span>
+                    </a>
+                </li>
+                <li class="xn-openable active">
+                    <a href="#">
+                        <span class="fa fa-cogs"></span>
+                        <span class="xn-text">Accounts</span>
+                    </a>
+                    <ul>
+                        <li>
+                            <a href="/accounts-add">
+                                <span class="fa fa-bell-o"></span>
+                                <span class="xn-text">Add Account</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/accounts">
+                                <span class="fa fa-users"></span>
+                                <span class="xn-text">Accounts</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="xn-title">
+                    Profile
+                </li>
+                <li>
+                    <a href="/logout">
+                        <span class="glyphicon glyphicon-log-out"></span>
+                        <span class="xn-text">Logout</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="page-content">
+            <div class="page-title">
+                <h2>Add Account</h2>
+            </div>
+            {% if errors|length > 0 %}
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="alert alert-danger">
+                            <ul>
+                            {% for key, error in errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            {% if messages|length > 0 %}
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="alert alert-success">
+                            <ul>
+                            {% for key, message in messages %}
+                                <li>{{ message }}</li>
+                            {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            <div class="row">
+                <div class="col-md-12">
+                    <form method="post" action="/accounts-add" class="form-horizontal">
+                        <div class="panel panel-default">
+                            <div class="panel-body">
+                                <div class="form-group">
+                                    <label for="first_name" class="col-md-3 col-xs-12 control-label">First Name:</label>
+                                    <div class="col-md-6 col-xs-12">
+                                        <div class="input-group">
+                                            <span class="input-group-addon">
+                                                <span class="fa fa-pencil">
+                                                    
+                                                </span>
+                                            </span>
+                                            <input type="text" name="first_name" class="form-control" {% if errors|length > 0 %} value="{{ parameters.first_name }}" {% else %} placeholder="First Name" {% endif %} />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="last_name" class="col-md-3 col-xs-12 control-label">Last Name:</label>
+                                    <div class="col-md-6 col-xs-12">
+                                        <div class="input-group">
+                                            <span class="input-group-addon" >
+                                                <span class="fa fa-pencil">
+                                                    
+                                                </span>
+                                            </span>
+                                            <input type="text" name="last_name" class="form-control" {% if errors|length > 0 %} value="{{ parameters.last_name }}" {% else %} placeholder="Last Name" {% endif %}/>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="email" class="col-md-3 col-xs-12 control-label">Email:</label>
+                                    <div class="col-md-6 col-xs-12">
+                                        <div class="input-group">
+                                            <span class="input-group-addon">
+                                                <span class="fa fa-envelope">
+                                                    
+                                                </span>
+                                            </span>                                    
+                                            <input type="email" name="email" class="form-control" {% if errors|length > 0 %} value="{{ parameters.email }}" {% else %} placeholder="Email" {% endif %}/>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="phone" class="col-md-3 col-xs-12 control-label">Phone:</label>
+                                    <div class="col-md-6 col-xs-12">
+                                        <div class="input-group">
+                                            <span class="input-group-addon">
+                                                <span class="fa fa-phone">
+                                                    
+                                                </span>
+                                            </span>                                    
+                                            <input type="text" name="phone" class="form-control" {% if errors|length > 0 %} value="{{ parameters.phone }}" {% else %} placeholder="Phone" {% endif %}/>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="address1" class="col-md-3 col-xs-12 control-label">Address 1:</label>
+                                    <div class="col-md-6 col-xs-12">
+                                        <div class="input-group">
+                                            <span class="input-group-addon">
+                                                <span class="fa fa-pencil">
+                                                    
+                                                </span>
+                                            </span>                                    
+                                            <input type="text" name="address1" class="form-control" {% if errors|length > 0 %} value="{{ parameters.address1 }}" {% else %} placeholder="Address" {% endif %}/>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                
+                                <div class="form-group">
+                                    <label for="address2" class="col-md-3 col-xs-12 control-label">Address 2:</label>
+                                    <div class="col-md-6 col-xs-12">
+                                        <div class="input-group">
+                                            <span class="input-group-addon">
+                                                <span class="fa fa-pencil">
+                                                    
+                                                </span>
+                                            </span>                                    
+                                            <input type="text" name="address2" class="form-control" {% if errors|length > 0 %} value="{{ parameters.address2 }}" {% else %} placeholder="Apt # / Suite #" {% endif %}/>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="city" class="col-md-3 col-xs-12 control-label">City:</label>
+                                    <div class="col-md-6 col-xs-12">
+                                        <div class="input-group">
+                                            <span class="input-group-addon">
+                                                <span class="fa fa-pencil">
+                                                    
+                                                </span>
+                                            </span>                                    
+                                            <input type="text" name="city" class="form-control" {% if errors|length > 0 %} value="{{ parameters.city }}" {% else %} placeholder="City" {% endif %}/>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="state" class="col-md-3 col-xs-12 control-label">State:</label>
+                                    <div class="col-md-6 col-xs-12">
+                                        <select name="state" class="form-control select">
+                                            <option value="AL" {% if ( errors|length > 0 ) and ( parameters.state == "AL" ) %} selected {% endif %}>Alabama</option>
+                                            <option value="AK" {% if ( errors|length > 0 ) and ( parameters.state == "AK" ) %} selected {% endif %}>Alaska</option>
+                                            <option value="AZ" {% if ( errors|length > 0 ) and ( parameters.state == "AZ" ) %} selected {% endif %}>Arizona</option>
+                                            <option value="AR" {% if ( errors|length > 0 ) and ( parameters.state == "AR" ) %} selected {% endif %}>Arkansas</option>
+                                            <option value="CA" {% if ( errors|length > 0 ) and ( parameters.state == "CA" ) %} selected {% endif %}>California</option>
+                                            <option value="CO" {% if ( errors|length > 0 ) and ( parameters.state == "CO" ) %} selected {% endif %}>Colorado</option>
+                                            <option value="CT" {% if ( errors|length > 0 ) and ( parameters.state == "CT" ) %} selected {% endif %}>Connecticut</option>
+                                            <option value="DE" {% if ( errors|length > 0 ) and ( parameters.state == "DE" ) %} selected {% endif %}>Delaware</option>
+                                            <option value="DC" {% if ( errors|length > 0 ) and ( parameters.state == "DC" ) %} selected {% endif %}>District Of Columbia</option>
+                                            <option value="FL" {% if ( errors|length > 0 ) and ( parameters.state == "FL" ) %} selected {% endif %}>Florida</option>
+                                            <option value="GA" {% if ( errors|length > 0 ) and ( parameters.state == "GA" ) %} selected {% endif %}>Georgia</option>
+                                            <option value="HI" {% if ( errors|length > 0 ) and ( parameters.state == "HI" ) %} selected {% endif %}>Hawaii</option>
+                                            <option value="ID" {% if ( errors|length > 0 ) and ( parameters.state == "ID" ) %} selected {% endif %}>Idaho</option>
+                                            <option value="IL" {% if ( errors|length > 0 ) and ( parameters.state == "IL" ) %} selected {% endif %}>Illinois</option>
+                                            <option value="IN" {% if ( errors|length > 0 ) and ( parameters.state == "IN" ) %} selected {% endif %}>Indiana</option>
+                                            <option value="IA" {% if ( errors|length > 0 ) and ( parameters.state == "IA" ) %} selected {% endif %}>Iowa</option>
+                                            <option value="KS" {% if ( errors|length > 0 ) and ( parameters.state == "KS" ) %} selected {% endif %}>Kansas</option>
+                                            <option value="KY" {% if ( errors|length > 0 ) and ( parameters.state == "KY" ) %} selected {% endif %}>Kentucky</option>
+                                            <option value="LA" {% if ( errors|length > 0 ) and ( parameters.state == "LA" ) %} selected {% endif %}>Louisiana</option>
+                                            <option value="ME" {% if ( errors|length > 0 ) and ( parameters.state == "ME" ) %} selected {% endif %}>Maine</option>
+                                            <option value="MD" {% if ( errors|length > 0 ) and ( parameters.state == "MD" ) %} selected {% endif %}>Maryland</option>
+                                            <option value="MA" {% if ( errors|length > 0 ) and ( parameters.state == "MA" ) %} selected {% endif %}>Massachusetts</option>
+                                            <option value="MI" {% if ( errors|length > 0 ) and ( parameters.state == "MI" ) %} selected {% endif %}>Michigan</option>
+                                            <option value="MN" {% if ( errors|length > 0 ) and ( parameters.state == "MN" ) %} selected {% endif %}>Minnesota</option>
+                                            <option value="MS" {% if ( errors|length > 0 ) and ( parameters.state == "MS" ) %} selected {% endif %}>Mississippi</option>
+                                            <option value="MO" {% if ( errors|length > 0 ) and ( parameters.state == "MO" ) %} selected {% endif %}>Missouri</option>
+                                            <option value="MT" {% if ( errors|length > 0 ) and ( parameters.state == "MT" ) %} selected {% endif %}>Montana</option>
+                                            <option value="NE" {% if ( errors|length > 0 ) and ( parameters.state == "NE" ) %} selected {% endif %}>Nebraska</option>
+                                            <option value="NV" {% if ( errors|length > 0 ) and ( parameters.state == "NV" ) %} selected {% endif %}>Nevada</option>
+                                            <option value="NH" {% if ( errors|length > 0 ) and ( parameters.state == "NH" ) %} selected {% endif %}>New Hampshire</option>
+                                            <option value="NJ" {% if ( errors|length > 0 ) and ( parameters.state == "NJ" ) %} selected {% endif %}>New Jersey</option>
+                                            <option value="NM" {% if ( errors|length > 0 ) and ( parameters.state == "NM" ) %} selected {% endif %}>New Mexico</option>
+                                            <option value="NY" {% if ( errors|length > 0 ) and ( parameters.state == "NY" ) %} selected {% endif %}>New York</option>
+                                            <option value="NC" {% if ( errors|length > 0 ) and ( parameters.state == "NC" ) %} selected {% endif %}>North Carolina</option>
+                                            <option value="ND" {% if ( errors|length > 0 ) and ( parameters.state == "ND" ) %} selected {% endif %}>North Dakota</option>
+                                            <option value="OH" {% if ( errors|length > 0 ) and ( parameters.state == "OH" ) %} selected {% endif %}>Ohio</option>
+                                            <option value="OK" {% if ( errors|length > 0 ) and ( parameters.state == "OK" ) %} selected {% endif %}>Oklahoma</option>
+                                            <option value="OR" {% if ( errors|length > 0 ) and ( parameters.state == "OR" ) %} selected {% endif %}>Oregon</option>
+                                            <option value="PA" {% if ( errors|length > 0 ) and ( parameters.state == "PA" ) %} selected {% endif %}>Pennsylvania</option>
+                                            <option value="RI" {% if ( errors|length > 0 ) and ( parameters.state == "RI" ) %} selected {% endif %}>Rhode Island</option>
+                                            <option value="SC" {% if ( errors|length > 0 ) and ( parameters.state == "SC" ) %} selected {% endif %}>South Carolina</option>
+                                            <option value="SD" {% if ( errors|length > 0 ) and ( parameters.state == "SD" ) %} selected {% endif %}>South Dakota</option>
+                                            <option value="TN" {% if ( errors|length > 0 ) and ( parameters.state == "TN" ) %} selected {% endif %}>Tennessee</option>
+                                            <option value="TX" {% if ( errors|length > 0 ) and ( parameters.state == "TX" ) %} selected {% endif %}>Texas</option>
+                                            <option value="UT" {% if ( errors|length > 0 ) and ( parameters.state == "UT" ) %} selected {% endif %}>Utah</option>
+                                            <option value="VT" {% if ( errors|length > 0 ) and ( parameters.state == "VT" ) %} selected {% endif %}>Vermont</option>
+                                            <option value="VA" {% if ( errors|length > 0 ) and ( parameters.state == "VA" ) %} selected {% endif %}>Virginia</option>
+                                            <option value="WA" {% if ( errors|length > 0 ) and ( parameters.state == "WA" ) %} selected {% endif %}>Washington</option>
+                                            <option value="WV" {% if ( errors|length > 0 ) and ( parameters.state == "WV" ) %} selected {% endif %}>West Virginia</option>
+                                            <option value="WI" {% if ( errors|length > 0 ) and ( parameters.state == "WI" ) %} selected {% endif %}>Wisconsin</option>
+                                            <option value="WY" {% if ( errors|length > 0 ) and ( parameters.state == "WY" ) %} selected {% endif %}>Wyoming</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                    
+                                <div class="form-group">
+                                    <label for="zip" class="col-md-3 col-xs-12 control-label">Zip Code:</label>
+                                    <div class="col-md-6 col-xs-12">
+                                        <div class="input-group">
+                                            <span class="input-group-addon">
+                                                <span class="fa fa-pencil">
+                                                    
+                                                </span>
+                                            </span>                                    
+                                            <input type="number" maxlenth="5" name="zip" class="form-control" {% if errors|length > 0 %} value="{{ parameters.zip }}" {% else %} placeholder="Zip" {% endif %}/>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="social" class="col-md-3 col-xs-12 control-label">Last 4 of Social:</label>
+                                    <div class="col-md-6 col-xs-12">
+                                        <div class="input-group">
+                                            <span class="input-group-addon">
+                                                <span class="fa fa-pencil">
+                                                    
+                                                </span>
+                                            </span>                                    
+                                            <input type="text" maxlength="4" name="social" class="form-control" {% if errors|length > 0 %} value="{{ parameters.social }}" {% else %} placeholder="Social" {% endif %}/>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="credit_company" class="col-md-3 col-xs-12 control-label">Credit Company:</label>
+                                    <div class="col-md-6 col-xs-12">
+                                        <div class="input-group">
+                                            <span class="input-group-addon">
+                                                <span class="fa fa-pencil">
+                                                    
+                                                </span>
+                                            </span>                                    
+                                            <input type="text" maxlength="4" name="credit_company" class="form-control" {% if errors|length > 0 %} value="{{ parameters.credit_company }}" {% else %} placeholder="Credit Company" {% endif %}/>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="credit_company_user" class="col-md-3 col-xs-12 control-label">Credit Company User:</label>
+                                    <div class="col-md-6 col-xs-12">
+                                        <div class="input-group">
+                                            <span class="input-group-addon">
+                                                <span class="fa fa-pencil">
+                                                    
+                                                </span>
+                                            </span>                                    
+                                            <input type="text" name="credit_company_user" class="form-control" {% if errors|length > 0 %} value="{{ parameters.credit_company_user }}" {% else %} placeholder="Credit Company Username" {% endif %}/>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="credit_company_password" class="col-md-3 col-xs-12 control-label">Credit Company Password:</label>
+                                    <div class="col-md-6 col-xs-12">
+                                        <div class="input-group">
+                                            <span class="input-group-addon">
+                                                <span class="fa fa-pencil">
+                                                    
+                                                </span>
+                                            </span>                                    
+                                            <input type="text" name="credit_company_password" class="form-control" {% if errors|length > 0 %} value="{{ parameters.credit_company_password }}" {% else %} placeholder="Credit Company Password" {% endif %}/>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="credit_company_code" class="col-md-3 col-xs-12 control-label">Credit Company Code:</label>
+                                    <div class="col-md-6 col-xs-12">
+                                        <div class="input-group">
+                                            <span class="input-group-addon">
+                                                <span class="fa fa-pencil">
+                                                    
+                                                </span>
+                                            </span>                                    
+                                            <input type="text" name="credit_company_code" class="form-control"  {% if errors|length > 0 %} value="{{ parameters.credit_company_code }}" {% else %} placeholder="Credit Company Security Code" {% endif %}/>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="panel-footer">
+                            <button type="submit" class="btn btn-primary">Add Account</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% include 'footer-js.html.twig' %}
+</body>
+</html>

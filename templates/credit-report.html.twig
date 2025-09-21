@@ -1,0 +1,744 @@
+<style type="text/css">
+    @page {
+        size: 7in 9.25in;
+        margin: 0.5in;
+    }
+    
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 11pt;
+        line-height: 1.6;
+        color: #333;
+        margin: 0;
+        padding: 0;
+    }
+    
+    #wrapper {
+        width: 100%;
+        padding: 20px;
+    }
+    
+    h3, h4, h5 {
+        color: #0056b3;
+        margin-bottom: 10px;
+    }
+    
+    h3 {
+        font-size: 1.5em;
+    }
+    
+    h4 {
+        font-size: 1.25em;
+    }
+    
+    h5 {
+        font-size: 1.1em;
+    }
+    
+    p {
+        margin: 0 0 1em;
+        font-size: 11pt;
+        color: #333;
+    }
+    
+    ol, ul {
+        margin: 0 0 1em 2em;
+        padding: 0;
+    }
+    
+    li {
+        margin-bottom: 0.5em;
+    }
+    
+    .size-100 {
+        width: 100%;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    
+    .credit-graph {
+        width: 250px;
+        height: 145px;
+        background: url('images/credit-rainbow.png') center no-repeat;
+        text-align: center;
+        vertical-align: bottom;
+        line-height: 145px;
+        font-size: 18px;
+        font-weight: bold;
+        color: #fff;
+    }
+    
+    .page-break {
+        page-break-after: always;
+    }
+    
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+    
+    thead th {
+        background: #f1f1f1;
+        border: 1px solid #c3c3c3;
+        padding: 8px;
+        text-align: left;
+    }
+    
+    tbody td {
+        border: 1px solid #c3c3c3;
+        padding: 8px;
+        vertical-align: top;
+    }
+    
+    .odd-color {
+        background: #f9f9f9;
+    }
+    
+    .border-none {
+        border: none;
+        box-shadow: none;
+    }
+    
+    strong {
+        color: #0056b3;
+    }
+    
+    @media print {
+        body {
+            color: #000;
+        }
+        .page-break {
+            display: block;
+            page-break-after: always;
+        }
+    }
+    </style>
+    <div id="wrapper">
+        <div class="size-100" style="padding-top: 100px;">
+            <img src="images/logo-new.png" width="500" />
+            <h4>Credit Analysis Report</h4>
+            <p><i>Prepared for</i></p>
+            <h3>{{ first_name }} {{ last_name }}</h3>
+            <p>{{ report_date }}</p>
+            <br/><br/>
+        </div>
+    
+        <div class="size-100">
+            <p>
+                <i>Prepared by</i><h4>Frantz Chery</h4>Top Tier Financial Solutions<br/>2141 Cortelyou Road<br/>Brooklyn, NY 11226<br/>info@toptierfinancialsolutions.com<br/>Office: (800) 478-7119<br/>Phone: (347) 699-4664<br/>Fax: (718) 489-4145<br/>https://www.toptierfinancialsolutions.com
+            </p>
+        </div>
+    
+        <div class="page-break">&nbsp;</div>
+    
+        <strong>Dear {{ first_name }} {{ last_name }}</strong>
+    
+        <p>On behalf of Top Tier Financial Solutions, I would like to extend a warm welcome to you as our new client. We are delighted to have the opportunity to work with you.</p>
+    
+        <p>First and foremost, we express our gratitude for choosing us to handle your credit needs. Your trust is our driving force. As we begin this journey together, please remember that regardless of your current credit situation, our aim is to make your credit improvement process as smooth and pleasant as possible. Remember, bad credit is no laughing matter!</p>
+    
+        <p>Important points regarding your credit audit:</p>
+        
+        <ol>
+            <li>This information is specifically tailored to your credit profile.</li>
+            <li>The insights provided are based on extensive research and expertise in the credit industry.</li>
+            <li>The audit will outline tasks for both you and Top Tier Financial Solutions to complete.</li>
+            <li>We encourage you to educate yourself on your credit.</li>
+        </ol>
+        
+        <p>This credit analysis report gives you a comprehensive overview of how potential lenders view your credit today. It identifies the factors negatively impacting your score and explains our legal strategies to improve it. Additionally, it includes a step-by-step plan for accelerating the process.</p>
+    
+        <p>This report is structured into the following five sections:</p>
+    
+        <ol>
+            <li>Credit Score Basics</li>
+            <li>Your Credit Scores and Summary</li>
+            <li>Analysis of Your Accounts</li>
+            <li>An Overview of Our Process</li>
+            <li>Your Role in the Process</li>
+        </ol>
+        
+        <p>Our team at Top Tier Financial Solutions is dedicated to supporting you every step of the way. Post-audit, we will begin working on your file based on the insights gathered. Upon completion, you will have various opportunities to continue working with us for further credit enhancement. We also offer services such as debt assumption and funding programs. Think of us first for any financial needs.</p>
+    
+        <p>If you have any questions during the process, please feel free to reach out. Our mission is to help you achieve your financial goals. Your success is our priority.</p>
+    
+        <ul>
+            <li>Email: info@toptierfinancialsolutions.com</li>
+            <li>Office: (800) 478-7119</li>
+            <li>Phone: (347) 699-4664</li>
+            <li>Fax: (718) 489-4145</li>
+            <li>Website: https://www.toptierfinancialsolutions.com</li>
+        </ul>
+    
+        <p>{{ first_name }} {{ last_name }}, thank you once again for entrusting Top Tier Financial Solutions with your credit restoration. We are honored to assist you in achieving your financial aspirations.</p>
+    
+        <p>Best regards,<br/>Frantz Chery</p>
+    
+        <h5>Scope of Work</h5>
+        <p>In the audit of the subject report, the auditor completed the following steps and analyses:</p>
+        
+        <ol>
+            <li>Gathered and analyzed data on the report.</li>
+            <li>In connection with this audit, the auditor may or may not have obtained information from:</li>
+        </ol>
+        <ul>
+            <li>Credit Reporting Agency</li>
+            <li>Consumer</li>
+            <li>Creditors of the Consumer</li>
+        </ul>
+        
+        <h5>Intended Use and Intended Users of the Audit</h5>
+        <p>The intended use of this audit is to provide support and knowledge based on the consumer data provided. The primary users of this report are our clients, their legal counsel, the opposing parties in any litigation, their legal counsel, and the court. This audit is prepared exclusively for the identified users. No third parties are authorized to rely on this report without the express written consent of the auditor.</p>
+    
+        <h5>Assumptions and Limiting Conditions</h5>
+        <p>The Summary of Audit at the conclusion of this report is subject to the following conditions and other specific limiting conditions as described by the auditor in the report. This summary should not be construed as legal or financial advice.</p>
+        
+        <ol>
+            <li>We assume no responsibility for legal matters affecting the report appraised.</li>
+            <li>We assume no responsibility for the accuracy of the credit report provided to our company.</li>
+            <li>Full compliance with all applicable federal, state, and local environmental regulations and laws is assumed unless noncompliance is stated, defined, and considered in the audit report.</li>
+            <li>We assume there are no hidden or unapparent conditions of the report that would render the accounts more or less damaging to the credit score. We assume no responsibility for such conditions.</li>
+            <li>No requirement shall be made of the auditor to appear in court by reason of this audit of the report in question.</li>
+            <li>Possession of this report, or a copy hereof, does not carry with it the right of publication nor may it be used for any purposes whatsoever by any party but those stated herein without the previous written consent of the auditor or the auditor’s client.</li>
+        </ol>
+    
+        <div class="page-break">&nbsp;</div>
+        
+        <h4>Part 1 - Credit Score Basics</h4>
+    
+        <p><strong>The Cost of a Low Credit Score</strong></p>
+    
+        <table style="text-align: center" class="size-100 border-none">
+            <tr>
+                <td colspan="2" class="border-none">
+                    <img src="images/toyota-camry.png" /><br/>
+                    Brand New Toyota Camry<br/>
+                    $23,000<br/>
+                    66-month term
+                </td>
+            </tr>
+            <tr>
+                <td class="border-none">
+                    Person A<br/>
+                    Credit Score: 730<br/>
+                    Interest Rate: 1.99%<br/>
+                    Monthly Payment: $368.22<br/>
+                    Total Interest Paid: $1,302.39<br/>
+                    Total Payments: $24,302.39<br/>
+                </td>
+                <td class="border-none">
+                    Person B<br/>
+                    Credit Score: 599<br/>
+                    Interest Rate: 14.99%<br/>
+                    Monthly Payment: $513.97<br/>
+                    Total Interest Paid: $10,921.44<br/>
+                    Total Payments: $33,921.44
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" class="border-none">
+                    <p>Person B pays more</p>
+                    <h4>$9,619.05 MORE</h4>
+                    <p>than Person A for the exact same car and price!</p>
+                    <p>This same scenario applies to your credit cards, mortgage, and other loans.</p>
+                    <p>Improving your credit can significantly reduce your bills and save you thousands of dollars!</p>
+                </td>
+            </tr>
+        </table>
+    
+        <div class="page-break">&nbsp;</div>
+    
+        <h5>What Is a Credit Score?</h5>
+        <p>A credit score is a numerical representation of your creditworthiness at a given moment. It predicts the likelihood of you becoming at least 90 days late on a payment within the next 24 months. Credit scores are calculated using proprietary formulas developed by various companies, with general guidelines provided on how these scores are determined.</p>
+        <p>Fair Isaac Corporation (FICO) pioneered the use of credit scores in 1956, but widespread adoption by creditors did not occur until the 1980s. In 1995, Fannie Mae and Freddie Mac recommended using credit scores in mortgage lending, solidifying their importance. Today, credit scores are also utilized by insurance companies and service providers to determine eligibility and terms of service.</p>
+        <p>Various credit scoring models exist, each tailored to different industries such as automotive lending, credit card issuance, or finance companies. It is estimated that over 1,000 different credit-scoring models are in use. However, the most widely recognized is the FICO score, which evaluates nearly 40 characteristics to predict debt repayment likelihood.</p>
+        <p>FICO categorizes consumers into groups with common key attributes, known as "scorecards," to enhance predictive accuracy. For example, one group may consist of consumers who have filed for bankruptcy, while another may include those with a single late payment. This system aims to make the credit score more accurate and reflective of individual circumstances.</p>
+        <p>Even within FICO's offerings, multiple credit-scoring models exist. The "Classic" FICO scoring model, which uses 10 scorecards, is the most commonly used. FICO also developed the "Next Generation" or "NextGen" model, which uses 18 scorecards and is considered more advanced. Enhancements to the Classic model are continually developed to improve accuracy.</p>
+        <p>The variety of credit-scoring models can pose challenges. Different creditors may use different models, leading to variations in credit scores. One lender might use the Classic FICO model, while another might use an enhanced version or the NextGen model. Consequently, the credit score a lender obtains can differ, potentially affecting a borrower's ability to qualify for certain loans based on the score used.</p>
+    
+        <h5>What Is a Credit Bureau?</h5>
+        <p>A credit bureau is an organization that collects and maintains your credit information, which it sells to lenders, creditors, and consumers in the form of a credit report. While numerous credit bureaus exist, the primary focus is on the three major bureaus: Equifax, Experian, and TransUnion.</p>
+    
+        <h5>What Is a Credit Report?</h5>
+        <p>A credit report contains detailed information about your financial history. Consumer reporting agencies, as defined by the Fair Credit Reporting Act (FCRA), gather this information and sell it to businesses with a legitimate need, such as creditors, employers, landlords, and insurance companies.</p>
+        <p>The FCRA defines a consumer-reporting agency as any entity that, for monetary fees, dues, or on a cooperative nonprofit basis, regularly engages in assembling or evaluating consumer credit information for the purpose of furnishing consumer reports to third parties.</p>
+        <p>These agencies sell your information to businesses and individuals who need to assess your credit risk. Potential creditors, employers, landlords, and insurance companies use this information to determine if you are a good risk for loans, services, or employment. If your credit report contains mostly positive information, you are more likely to receive favorable terms. Conversely, a report with negative information can hinder your chances.</p>
+        <p>Currently, the three major credit bureaus—Equifax, Experian (formerly TRW), and TransUnion—maintain credit information on more than 200 million consumers nationwide.</p>
+    
+        <h5>What's Included in Your Credit Report?</h5>
+        <p>
+            <strong>Personal Data:</strong><br/>
+            This section includes identifying and employment information such as your full name, spouse's name, current and former addresses, date of birth, and current and former employers. Although this section does not directly affect your credit score, it is crucial for identification purposes. Ensure that this information is accurate, as suffixes (Sr., Jr., III) can often cause mix-ups.
+        </p>
+        <p>
+            <strong>Public Records:</strong><br/>
+            This section contains publicly available information about legal matters affecting your credit, such as judgments in civil actions, tax liens, and bankruptcies. All court records, including satisfactions, are considered negative by credit grantors.
+        </p>
+        <p>
+            <strong>Accounts/Trade Lines:</strong><br/>
+            This includes credit cards, auto loans, mortgages, real estate, installment loans, and revolving debt like department store cards. The report provides details such as balance, payment history, terms, and account status (e.g., bankruptcy, charge-off, or repossession).
+        </p>
+        <p>
+            <strong>Collection Accounts:</strong><br/>
+            Collections are accounts seriously past due and transferred to a collection agency or creditor's internal collection department. Collections can be paid or unpaid, and any type is considered negative. Multiple listings for the same debt may occur as it is sold to different agencies, but only one record should be marked as open.
+        </p>
+        <p>
+            <strong>Inquiries:</strong><br/>
+            Every time you apply for credit, a credit report is pulled, and the inquiry is recorded. The inquiry section lists businesses that have checked your credit in the last two years. Hard inquiries, made by creditors and lenders for application purposes, can harm your credit score if too many accumulate.
+        </p>
+    
+        <h5>What's Not Included in Your Credit Reports?</h5>
+        <p>Contrary to popular belief, your credit report does not contain information about your checking or savings accounts, race, religion, gender, political affiliation, or personal lifestyle. It also excludes medical history and criminal records. However, other consumer reporting agencies may collect, maintain, and report some of this information.</p>
+        <p>Additionally, an “investigative consumer report” may include information about your character, reputation, personal characteristics, or lifestyle, obtained through personal interviews. The FCRA requires companies to notify you if they prepare such a report. While concerning, our focus remains on credit reports.</p>
+        <p>Your credit report might not contain information from all creditors. Some creditors do not report to all or any credit bureaus, so parts of your credit history may appear in different reports or not at all.</p>
+    
+        <h5>Where Does the Information Come From?</h5>
+        <p>Credit reports are created using information from various sources:</p>
+        <p>
+            <strong>You:</strong><br/>
+            When you apply for credit, you provide personal information that potential creditors send to the credit bureaus, becoming part of your credit file. Ensure consistency and accuracy when completing credit applications.
+        </p>
+        <p>
+            <strong>Your Creditors:</strong><br/>
+            Creditors report your payment history to credit bureaus. While some report all payment history monthly (automatic subscribers), others report only certain types of information like delinquencies (limited subscribers). Automatic subscribers may not report to all major bureaus, leading to discrepancies in credit reports.
+        </p>
+        <p>
+            <strong>Automatic Subscribers:</strong><br/>
+            These creditors regularly report comprehensive account information to credit bureaus, including account opening dates, debt amounts, balances, and payment history. Not all automatic subscribers report to all credit bureaus.
+        </p>
+        <p>
+            <strong>Limited Subscribers:</strong><br/>
+            These creditors report only specific information, usually negative, such as delinquencies or collections. Examples include apartment management companies, insurance companies, utility companies, medical providers, and collection agencies. Limited subscribers may report to only one bureau.
+        </p>
+        <p>
+            <strong>Creditors That Do Not Report:</strong><br/>
+            Some creditors do not report to any credit bureaus, meaning their information will not appear on your credit reports. Typically, these creditors include individuals (e.g., landlords) or small companies.
+        </p>
+    
+        <h5>Who Can See Your Credit Reports?</h5>
+        <p>Section 604 of the FCRA (15 U.S.C. section1681b) outlines who can access your credit report and for what reasons. Generally, prospective creditors can access it. Other permissible purposes include:</p>
+        <ol>
+            <li>A court or federal grand jury</li>
+            <li>You</li>
+            <li>Someone intending to use the information for a credit transaction</li>
+            <li>Individuals or companies using the information for employment, insurance underwriting, or government benefits</li>
+            <li>Individuals or companies with a legitimate business need in connection with a transaction initiated by you</li>
+            <li>A state or local child support enforcement agency</li>
+            <li>An agency administering a State plan under section 454 of the Social Security Act for child support</li>
+        </ol>
+    
+        <h5>How Are Credit Scores Calculated?</h5>
+        <p>
+            <img src="images/credit-graph.png" />
+        </p>
+        <p>
+            Credit scoring formulas are proprietary secrets, much like the formula for Coca-Cola or your grandmother’s legendary cookies. This secrecy can be frustrating for consumers who see remarks on their credit report such as “too many revolving debt accounts” without a clear explanation. Here, we will break down the factors contributing to your FICO score.
+        </p>
+        
+        <h5>Payment History - 35%</h5>
+        <p>Payment history is the most significant factor, as lenders want to know your past and present payment habits. This category can be broken down into three subcategories:</p>
+        <ul>
+            <li><strong>Recency:</strong> The last time a payment was late. The more time that passes, the better.</li>
+            <li><strong>Frequency:</strong> One late payment is less damaging than multiple late payments in a row.</li>
+            <li><strong>Severity:</strong> A payment 30 days late is less serious than one 60 or 120 days late. Collections, tax liens, and bankruptcies are particularly detrimental to your score.</li>
+        </ul>
+        
+        <h5>Utilization Ratio - 30%</h5>
+        <p>The score examines the total amount owed on all accounts and the amounts owed on different types of accounts, especially revolving accounts. High utilization rates can hurt your score, as they suggest overextension and increased risk of default. For example, if you have a credit card with a $10,000 limit and a $2,000 balance, your utilization ratio is 20%. Lower ratios improve your score. Paying down balances can take up to 45 days to reflect on your credit reports.</p>
+        
+        <h5>Age of File - 15%</h5>
+        <p>This factor considers the age of your oldest account and the average age of all open accounts. Longer credit histories generally contribute to higher scores, although young people and new credit users can still achieve good scores by maintaining positive habits.</p>
+        
+        <h5>Mix of Credit - 10%</h5>
+        <p>A healthy mix of credit types, including revolving debt (credit cards) and installment loans (auto loans, mortgages), is favorable. Typically, a good report includes a mortgage, 1-2 auto loans, 3-5 credit cards, and some personal or student loans.</p>
+        
+        <h5>Inquiries/Recent Credit - 10%</h5>
+        <p>New credit is not always negative, but applying for numerous accounts in a short period can harm your score, particularly if you have a short credit history. The score considers:</p>
+        <ul>
+            <li>How many accounts you have applied for recently</li>
+            <li>How many new accounts you have opened</li>
+            <li>The time elapsed since your last application</li>
+            <li>The time elapsed since you opened an account</li>
+        </ul>
+        <p>To accommodate rate shopping, multiple inquiries within a 14-day period count as one. However, excessive inquiries can indicate greater risk. According to MyFico.com, people with six or more inquiries are significantly more likely to declare bankruptcy than those with no inquiries.</p>
+        
+        <h5>How Your Behavior Is Evaluated In Your Credit Report:</h5>
+    
+        <p>
+            <strong>Do you pay your bills on time?</strong> Payment history is a major factor in credit scoring. If you have paid bills late, have collections, or a bankruptcy, these events won't reflect well in your credit score.
+        </p>
+        <p>
+            <strong>Do you have a long credit history?</strong> Generally speaking, the longer your history of holding accounts is, the more trusted you will be as a borrower.
+        </p>
+        <p>
+            <strong>Have you applied for credit recently?</strong> If you have many recent inquiries, this can be construed as being negative by the bureaus. Only apply for credit when you really need it.
+        </p>
+        <p class="page-break">
+            <strong>What is your outstanding debt?</strong> It is important to not use all of your available credit. If all of your credit cards are maxed out, your scores will reflect that you are not managing your debt wisely.
+        </p>
+    
+        <h5>Credit Score Ranges and Their Meaning</h5>
+        <p><img src="images/credit-bar.png" /></p>
+        <p>
+            <strong>800 and Higher</strong> (Excellent) A credit score in this range ensures loan approval and the lowest possible APR on credit cards. Achieving this requires financial discipline, a good credit history, and substantial ongoing credit usage repaid promptly.
+        </p>
+        <p>
+            <strong>700 - 799</strong> (Very Good) 27% of the U.S. population falls into this range, enjoying good rates and approvals for nearly any type of loan.
+        </p>
+        <p>
+            <strong>680 - 699</strong> (Good) This average score range usually ensures approvals, albeit with slightly higher interest rates. Improving your score above 720 can result in significant long-term savings, especially for mortgages.
+        </p>
+        <p>
+            <strong>620 - 679</strong> (Fair) Rates may not be the best, but approvals are still possible. Terms may include certain restrictions.
+        </p>
+        <p>
+            <strong>580 - 619</strong> (Poor) Loans are obtainable but with unappealing terms and high interest rates, resulting in higher overall costs.
+        </p>
+        <p>
+            <strong>500 - 579</strong> (Bad) Loans are available but not recommended due to extremely high rates and unfavorable terms. Consider consolidating debt cautiously.
+        </p>
+        <p>
+            <strong>499 and Lower</strong> (Very Bad) Immediate action is needed to address significant credit issues. Fix your credit before applying for any loans to avoid exorbitant rates and strict terms.
+        </p>
+    
+        <div class="page-break">&nbsp;</div>
+    
+        <h3>Part 2 - Your Credit Scores and Summary</h3>
+        <p>
+            We have analyzed your credit reports from the three major bureaus. Here are our findings:
+        </p>
+        <h4>Your Credit Scores:</h4>
+        <table class="size-100">
+            <thead>
+                <tr>
+                    <th>EQUIFAX</th>
+                    <th>TRANSUNION</th>
+                    <th>EXPERIAN</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="credit-graph">
+                        <h3>{{ equifax_credit_score }}</h3>
+                    </td>
+                    <td class="credit-graph">
+                        <h3>{{ transunion_credit_score }}</h3>
+                    </td>
+                    <td class="credit-graph">
+                        <h3>{{ experian_credit_score }}</h3>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <h3>Keep Your Credit Monitoring Account Active Throughout the Credit Repair Process</h3>
+        <p>
+            Your credit scores may vary depending on where you obtain your credit reports, as different sources use different methods for determining your score and scheduling updates. Maintaining a single credit monitoring account will provide a consistent baseline for tracking changes. Therefore, it is crucial to keep the same credit monitoring account active rather than checking scores on multiple sites that may differ.
+        </p>
+    
+        <h3>Your Derogatory Summary:</h3>
+        <p>
+            We have identified items on your reports that are negatively impacting your score. Here are our findings:
+        </p>
+    
+        <table class="size-100">
+            <thead>
+                <tr>
+                    <th>&nbsp;</th>
+                    <th>EQUIFAX</th>
+                    <th>EXPERIAN</th>
+                    <th>TRANSUNION</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="odd-color">
+                    <td>Delinquent:</td>
+                    <td>{{ equifax_delinquent }}</td>
+                    <td>{{ experian_delinquent }}</td>
+                    <td>{{ transunion_delinquent }}</td>
+                </tr>
+                <tr>
+                    <td>Derogatory:</td>
+                    <td>{{ equifax_derogatory }}</td>
+                    <td>{{ experian_derogatory }}</td>
+                    <td>{{ transunion_derogatory }}</td>
+                </tr>
+                <tr class="odd-color">
+                    <td>Collection:</td>
+                    <td>{{ equifax_collection }}</td>
+                    <td>{{ experian_collection }}</td>
+                    <td>{{ transunion_collection }}</td>
+                </tr>
+                <tr>
+                    <td>Public Records:</td>
+                    <td>{{ equifax_public_records }}</td>
+                    <td>{{ experian_public_records }}</td>
+                    <td>{{ transunion_public_records }}</td>
+                </tr>
+                <tr class="odd-color">
+                    <td>Inquiries (2 years):</td>
+                    <td>{{ equifax_inquiries }}</td>
+                    <td>{{ experian_inquiries }}</td>
+                    <td>{{ transunion_inquiries }}</td>
+                </tr>                                              
+            </tbody>
+        </table>
+    
+        <div class="page-break">&nbsp;</div>
+    
+        <h4>Part 3 - Analysis of Your Accounts</h4>
+    
+        <h5>Your Derogatory Items:</h5>
+        <p>
+            You have <strong>{{ derogatory_accounts_total }}</strong> items marked as delinquent or derogatory. Recent late payments, collections, and other derogatory items within the last six months will hurt your credit score more than older inactive accounts. Accounts within the last 24 months carry the second most weight. This is why it is crucial to pay all bills on time and avoid missed payments.
+        </p>
+    
+        {% if derogatory_accounts_total > 0 %}
+            <table class="size-100">
+                <thead>
+                    <tr>
+                        <th>Creditor/Furnisher</th>
+                        <th>Equifax</th>
+                        <th>Experian</th>
+                        <th>TransUnion</th>
+                        <th>Issue</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% set x = 1 %}
+                    {% for misc, derogatory_items in derogatory_accounts %}
+                    {% set xclass = x % 2 == 0 ? 'class=odd-color' : '' %}
+                    <tr {{ xclass }}>
+                        <td>{{ derogatory_items.account }}</td>
+                        <td>{{ derogatory_items.equifax_account_date }}</td>
+                        <td>{{ derogatory_items.experian_account_date }}</td>
+                        <td>{{ derogatory_items.trans_union_account_date }}</td>
+                        <td>{{ derogatory_items.unique_status }}</td>
+                    </tr>
+                    {% set x = x + 1 %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    
+        <h4>Your Public Records:</h4>
+        <p>
+            You have <strong>{{ public_records_total }}</strong> public records. Public records include court records, bankruptcy filings, tax liens, and monetary judgments. These generally remain on your credit report for 7 to 10 years.
+        </p>
+    
+        {% if public_records_total > 0 %}
+            <table class="size-100">
+                <thead>
+                    <tr>
+                        <th>Creditor/Furnisher</th>
+                        <th>Equifax</th>
+                        <th>Experian</th>
+                        <th>TransUnion</th>
+                        <th>Issue</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% set x = 0 %}
+                    {% for b, public_records_accounts in public_records %}
+                    {% set xclass = x % 2 == 0 ? 'class=odd-color' : '' %}
+                    <tr {{ xclass }}>
+                        {% for key, value in public_records_accounts %}
+                        <td>{{ value }}</td>
+                        {% endfor %}
+                    </tr>
+                    {% set x = x + 1 %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    
+        <h4>Your Inquiries:</h4>
+        <p>
+            You have <strong>{{ inquiry_total }}</strong> inquiries on your reports. Each time you apply for credit, it lowers your score. Therefore, we ask that you <u>do not apply for any new credit</u> during the credit repair process.
+        </p>
+    
+        {% if inquiry_total > 0 %}
+            <table class="size-100">
+                <thead>
+                    <tr>
+                        <th>Business</th>
+                        <th>Business Type</th>
+                        <th>Date</th>
+                        <th>Bureau</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% set x = 0 %}
+                    {% for a, inquiry_items in inquiry_accounts %}
+                    {% set xclass = x % 2 == 0 ? 'class=odd-color' : '' %}
+                    <tr {{ xclass }}>
+                        {% for key, value in inquiry_items %}
+                        <td>{{ value }}</td>
+                        {% endfor %}
+                    </tr>
+                    {% set x = x + 1 %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    
+        <h5>We Are Experts in Disputing Errors on Your Report That Lower Your Score.</h5>
+        <p class="page-break">
+            While we cannot promise to remove all negative items on your report, we are well-versed in using the law to your advantage, and we have an excellent track record.
+        </p>
+        <h5>Credit Utilization:</h5>
+        <table class="size-100">
+            <thead>
+                <tr>
+                    <th>&nbsp;</th>
+                    <th>Transunion</th>
+                    <th>Equifax</th>
+                    <th>Experian</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Credit Card Limit</td>
+                    <td>${{ credit_info.trans_union_limit }}</td>
+                    <td>${{ credit_info.equifax_limit }}</td>
+                    <td>${{ credit_info.experian_limit }}</td>
+                </tr>
+                <tr>
+                    <td>Open Credit Card Debt</td>
+                    <td>${{ credit_info.trans_union_balance }}</td>
+                    <td>${{ credit_info.equifax_balance }}</td>
+                    <td>${{ credit_info.experian_balance }}</td>
+                </tr>
+                <tr>
+                    <td>&nbsp;</td>
+                    <td>{{ credit_info.trans_union_percent }}% <img src="images/{{ credit_info.trans_union_percent_img }}" /></td>
+                    <td>{{ credit_info.equifax_percent }}% <img src="images/{{ credit_info.equifax_percent_img }}" /></td>
+                    <td>{{ credit_info.experian_percent }}% <img src="images/{{ credit_info.experian_percent_img }}" /></td>
+                </tr>
+            </tbody>
+        </table>
+        <p>
+            You have <strong>${{ credit_info.total_limit }}</strong> in revolving credit lines and your balances average <strong>${{ credit_info.total_balance }}</strong>, which means that you are utilizing <strong>{{ credit_info.total_percent }}%</strong> of your available credit line.
+        </p>
+    
+        <h5>How This Impacts Your Score</h5>
+        <p>
+            The purpose of a credit score is to help lenders determine the likelihood that you will repay the money you borrow. The scoring algorithms assess whether you're overextended in credit card debt and living beyond your means. Maxing out your cards will lower your score, while showing more available credit will increase it.
+        </p>
+        <p>
+            Pro tip: If you're carrying high balances, a quick way to increase your score is to pay your balances down to below 25% of the available credit limit on each card and never spend more than that, even if you pay the balance off in full each month.
+        </p>
+    
+        <h5>How Quickly Will I See the Changes?</h5>
+        <p class="page-break">
+            Credit card companies report your balances to the bureaus once per month (each on a different day), and your credit reports and scores at the credit monitoring company will only update once per month. Therefore, it can take up to two months to see this begin to impact your scores. For this reason, it's important to understand that improving your credit scores takes time and a commitment to change your daily habits and spending patterns. The good news is that the sooner you make these changes, the sooner your scores will rise.
+        </p>
+    
+        <h5>Credit Utilization Summary:</h5>
+        <table class="size-100">
+            <thead>
+                <tr>
+                    <th>&nbsp;</th>
+                    <th>EQUIFAX</th>
+                    <th>EXPERIAN</th>
+                    <th>TRANSUNION</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="odd-color">
+                    <td><strong>Credit Summary</strong></td>
+                    <td colspan="3">An overview of credit status, including open and closed accounts and balance information</td>
+                </tr>
+                <tr>
+                    <td>Total Accounts:</td>
+                    <td>{{ equifax_total_accounts }}</td>
+                    <td>{{ experian_total_accounts }}</td>
+                    <td>{{ transunion_total_accounts }}</td>
+                </tr>
+                <tr class="odd-color">
+                    <td>Open Accounts:</td>
+                    <td>{{ equifax_open_accounts }}</td>
+                    <td>{{ experian_open_accounts }}</td>
+                    <td>{{ transunion_open_accounts }}</td>
+                </tr>
+                <tr>
+                    <td>Closed Accounts:</td>
+                    <td>{{ equifax_closed_accounts }}</td>
+                    <td>{{ experian_closed_accounts }}</td>
+                    <td>{{ transunion_closed_accounts }}</td>
+                </tr>
+                <tr class="odd-color">
+                    <td>Balances:</td>
+                    <td>{{ equifax_balances }}</td>
+                    <td>{{ experian_balances }}</td>
+                    <td>{{ transunion_balances }}</td>
+                </tr>
+                <tr>
+                    <td>Payments:</td>
+                    <td>{{ equifax_payments }}</td>
+                    <td>{{ experian_payments }}</td>
+                    <td>{{ transunion_payments }}</td>
+                </tr>
+            </tbody>
+        </table>
+    
+        <h4>Part 4 - An Overview of Our Process</h4>
+    
+        <h5>Our Plan of Action</h5>
+        <p>
+            The credit system is flawed, with nearly 80% of all reports containing errors that can lower your score. However, you have rights, and we know how to use them to your benefit! The law gives you the right to dispute any item on your credit reports. If these items cannot be verified, they must be removed. We will write numerous letters to the bureaus, and if they cannot prove it, they must remove it! We excel at this process.
+        </p>
+    
+        <h5>We Provide Document Preparation and Credit Education</h5>
+        <p class="page-break">
+            We will draft many letters on your behalf to credit bureaus and creditors to check for compliance and challenge the items you wish to dispute. Along the way, we will guide you on how to better manage your credit and maintain excellent credit long after our work is done.
+        </p>
+    
+        <h4>Part 5 - Your Role in the Process</h4>
+    
+        <h5>Your Next Steps</h5>
+        <ol>
+            <li>Log into your Client Portal. We will email you the login details.</li>
+            <li>Provide a copy of your Photo ID, Social Security Card, and a copy of the top section of a recent utility bill (or an insurance statement or some other bill) as proof of your current address. These documents will be included in our letters to the credit bureaus. You can scan the documents or take a clear picture of them on your mobile device, place them on a plain white paper, and upload them to us in your client portal.</li>
+        </ol>
+    
+        <h5>How You Can Speed Up the Process</h5>
+        <ol>
+            <li>Stop applying for credit (each time you do, it lowers your scores).</li>
+            <li>Do not close any accounts (this also lowers your score).</li>
+            <li>Pay your credit cards down to below 25% of the available credit line. This will significantly improve your credit score.</li>
+            <li>Never spend more than 25% of the available credit line, even if you pay the balance off in full each month.</li>
+            <li>Pay your bills on time! One missed payment will dramatically lower your score and undo all the work we are doing.</li>
+            <li>Keep your credit monitoring account active throughout the credit repair process, so we can track changes to your accounts and scores. Your score won't suffer if you're ordering your own reports. Be sure to let us know your login details to the credit monitoring account. You can add those in your client portal.</li>
+            <li>Most importantly, we'll be sending many letters to the bureaus. Be sure to open all of your mail and forward the replies to us. This can be as simple as taking a photo with your phone and uploading it to your portal (or attaching it to an email).</li>
+        </ol>
+    
+        <h5>This Process Takes Time</h5>
+        <p>
+            Remember, it has taken you years to get your credit into its current state, so cleaning it up will not happen overnight. We cannot dispute everything at once, or the credit bureaus will reject the disputes as "frivolous." Therefore, we must proceed carefully and strategically. It takes 30 to 45 days for bureaus and creditors to respond to each letter, and even more time for changes to reflect on your reports. A difficult item may require multiple letters to multiple parties, so patience is key. Thanks to technology (and by logging into our client portal), you'll receive real-time updates of our progress every step of the way.
+        </p>
+        <p>
+            By following our program and advice, your credit will improve, and we will teach you how to maintain excellent credit long after our work is done.
+        </p>
+    
+        <h5>So Let's Get Started!</h5>
+        <p>
+            How do we do that? Just reach out to us, so we can complete your signup process and activate your client portal access (if we haven't already).
+        </p>
+        <p>
+            Our phone number is (800) 478-7119<br/>
+            Our email is info@toptierfinancialsolutions.com<br/>
+            Our site is at https://www.toptierfinancialsolutions.com/
+        </p>
+        <p>
+            Throughout this process, our contact information is always on our website and in our emails. You can also send us secure messages in your portal. We want to hear from you and we are eager to help. Once the credit repair process begins, we will send you progress reports and updates every step of the way.
+        </p>
+        <p>
+            We appreciate that you chose us. We look forward to working with you to improve your credit and your financial future!
+        </p>
+        <p>
+            Credit is our passion. We understand how important your credit is for your future, and we work tirelessly to help you achieve your financial goals.
+        </p>
+    </div>
+    

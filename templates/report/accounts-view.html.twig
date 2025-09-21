@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en" class="body-full-height">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Accounts</title>
+
+    <link rel="stylesheet" href="/templates/joli/css/theme-blue.css">
+
+  </head>
+  <body>
+    <div class="page-container" style="height: 100vh;">
+        <div class="page-sidebar page-sidebar-fixed scroll">
+            <ul class="x-navigation">
+                <li class="xn-logo">
+                    <a href="/">Top Tier</a>
+                    <a href="#" class="x-navigation-control"></a>
+                </li>
+                <li class="xn-title">
+                    Navigation
+                </li>
+                <li>
+                    <a href="/dashboard">
+                        <span class="fa fa-desktop"></span>
+                        <span class="xn-text">Dashboard</span>
+                    </a>
+                </li>
+                <li class="xn-openable active">
+                    <a href="#">
+                        <span class="fa fa-cogs"></span>
+                        <span class="xn-text">Accounts</span>
+                    </a>
+                    <ul>
+                        <li>
+                            <a href="/accounts-add">
+                                <span class="fa fa-bell-o"></span>
+                                <span class="xn-text">Add Account</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/accounts">
+                                <span class="fa fa-users"></span>
+                                <span class="xn-text">Accounts</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="xn-title">
+                    Profile
+                </li>
+                <li>
+                    <a href="/logout">
+                        <span class="glyphicon glyphicon-log-out"></span>
+                        <span class="xn-text">Logout</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="page-content">
+            <div class="page-title">
+                <h2>Account: {{ account_info.first_name }} {{ account_info.last_name }}</h2>
+            </div>
+            
+                
+            {% if errors|length > 0 %}
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="alert alert-danger">
+                            <ul>
+                            {% for key, error in errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            {% if messages|length > 0 %}
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="alert alert-success">
+                            <ul>
+                            {% for key, message in messages %}
+                                <li>{{ message }}</li>
+                            {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <h3>Add Report</h3>
+                            <form id="uploader" method="post" action="/accounts-view?aid={{ account_info.aid }}" enctype="multipart/form-data" class="horizontal">
+                                <input type="hidden" name="upload" value="true" />
+                                <div class="form-group"> 
+                                    <label for="html_file" class="col-md-3 col-xs-12 control-label">File</label>
+                                    <div class="col-md-12">
+                                        <input id="file-uploader" type="file" class="file" data-preview-file-type="html" accept="text/html, text/htm" name="html_file" >
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <h3>Customer Information</h3>
+                            <table>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Name:</strong></td>
+                                        <td>{{ account_info.first_name }} {{ account_info.last_name }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="vertical-align: top;"><strong>Address:</strong></td>
+                                        <td>
+                                            {{ account_info.address1 }}<br/>
+                                            {{ account_info.address2 }}<br/>
+                                            {{ account_info.city }}, {{ account_info.state }} {{ account_info.zip }}
+                                        </td>
+                                    </tr>                                    
+                                    <tr>
+                                        <td><strong>Phone:</strong></td>
+                                        <td>{{ account_info.phone }}</td>
+                                    </tr>                          
+                                    <tr>
+                                        <td><strong>Email:</strong></td>
+                                        <td>{{ account_info.email }}</td>
+                                    </tr>                          
+                                    <tr>
+                                        <td><strong>Social</strong></td>
+                                        <td>XXX-XX-{{ account_info.social }}</td>
+                                    </tr>    
+                                    <tr>
+                                        <td><strong>Credit Reporting Company:</strong></td>
+                                        <td>{{ account_info.credit_company }}</td>
+                                    </tr>    
+                                    <tr>
+                                        <td><strong>Credit Reporting Username:</strong></td>
+                                        <td>{{ account_info.credit_company_user }}</td>
+                                    </tr>         
+                                    <tr>
+                                        <td><strong>Credit Reporting Password:</strong></td>
+                                        <td>{{ account_info.credit_company_password }}</td>
+                                    </tr>      
+                                    <tr>
+                                        <td><strong>Credit Reporting Security Code:</strong></td>
+                                        <td>{{ account_info.credit_company_code }}</td>
+                                    </tr>            
+                                    <tr>
+                                        <td colspan="2"><a href="/accounts-edit?aid={{ account_info.aid }}">Edit</a></td>
+                                    </tr>                                                                 
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <h3>Reports</h3>
+                            <table  class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>File</th>
+                                        <th>Added</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% if files|length > 0 %}
+                                        {% for key, file in files %}
+                                            <tr>
+                                                <td>{{ file.fid }}</td>
+                                                <td><a href="/html-report?file={{ file.filename }}" target="_blank">{{ file.filename }}</a></td>
+                                                <td>{{ file.added }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    {% else %}
+                                        <tr><td colspan="3">No Reports Found!</td></tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% include 'footer-js.html.twig' %}
+</body>
+</html>

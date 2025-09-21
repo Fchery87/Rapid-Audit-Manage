@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Report Upload</title>
+
+    <link rel="stylesheet" href="/templates/joli/css/theme-blue.css">
+
+  </head>
+  <body>
+  <div class="page-container">
+    <div class="page-sidebar page-sidebar-fixed scroll">
+        <ul class="x-navigation">
+            <li class="xn-logo">
+                <a href="/">Top Tier</a>
+            </li>
+            <li class="xn-title">Navigation</li>
+            
+        </ul>
+    </div>
+
+    <div class="container">
+        <img class="center-block" src="images/logo-new.png" width="500" />
+    </div>
+
+    {% if errors|length > 0 %}
+        <div id="errors">
+            <ul>
+            {% for key, error in errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+    <div class="container">
+        <form id="uploader" method="post" action="/upload" enctype="multipart/form-data">
+            <fieldset>
+                <legend>Add HTML File</legend>
+                <div class="form-group has-success">
+                    <h5>{{ message }}</h5>
+                </div>
+                <div class="form-group"> 
+                    <input type="hidden" name="upload" value="true" />
+                    <label>File</label><input type="file" name="html_file" accept="text/html" />
+                    <span class="help-block">Select an HTML file to upload</span>
+                    <input type="submit" name="submit" value="Upload" />
+                </div>
+            </fieldset>
+        </form>
+    </div>
+
+    <div class="container">
+        <h3>Files</h3>
+        {% if files|length > 0 %}
+            <ol>
+            {% for key, file in files %}
+                <li><a href="/html-report?file={{ file }}" target="_blank">{{ file }}</a></li>
+            {% endfor %}
+            </ol>
+        {% endif %}
+    </div>
+    </div>
+  </body>
+</html>
