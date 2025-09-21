@@ -1,0 +1,30 @@
+# OS / Editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*~
+
+# Composer
+/vendor/
+
+# Symfony / Cache & Logs
+/var/
+!.gitkeep
+/var/cache/
+/var/log/
+/var/sessions/
+.phpunit.result.cache
+
+# Local environment overrides
+.env.local
+.env.*.local
+
+# Uploads and temporary artifacts
+/misc/
+!/misc/.gitkeep
+
+# Node/Frontend (if introduced later)
+/node_modules/
+/public/build/
+/public/assets/build/
