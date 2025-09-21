@@ -177,29 +177,38 @@
                 $data = $form->getData();
                 $em = $doctrine->getManager();
                 $conn = $em->getConnection();
-                $query = "UPDATE accounts SET first_name = :first_name, last_name = :last_name, email = :email, phone = :phone, address1 = :address1, address2 = :address2, city = :city, state = :state, zip = :zip, social = :social, credit_company = :credit_company, credit_company_user = :credit_company_user, credit_company_password = :credit_company_password, credit_company_code = :credit_company_code WHERE aid = :aid LIMIT 1";
-                $statement = $conn->prepare($query);
-                $affected = $statement->executeStatement([
-                    "first_name" => $data['first_name'],
-                    "last_name" => $data['last_name'],
-                    "email" => $data['email'],
-                    "phone" => $data['phone'],
-                    "address1" => $data['address1'],
-                    "address2" => $data['address2'],
-                    "city" => $data['city'],
-                    "state" => $data['state'],
-                    "zip" => $data['zip'],
-                    "social" => $data['social'],
-                    "credit_company" => $data['credit_company'],
-                    "credit_company_user" => $data['credit_company_user'],
-                    "credit_company_password" => $data['credit_company_password'],
-                    "credit_company_code" => $data['credit_company_code'],
-                    "aid" => $aid,
-                ]);
-                if($affected >= 0) {
-                    $messages[] = "Account sucessfully udpated!";
+
+                // Ensure email is unique (excluding current account)
+                $check = $conn->prepare("SELECT COUNT(*) `rows` FROM accounts WHERE email = :email AND aid != :aid")
+                    ->executeQuery(["email" => $data['email'], "aid" => $aid])
+                    ->fetchAllAssociative();
+                if (!empty($check) && (int)$check[0]['rows'] > 0) {
+                    $errors[] = "Email address already exists";
                 } else {
-                    $errors[] = "Failed to update record. Contact admin";
+                    $query = "UPDATE accounts SET first_name = :first_name, last_name = :last_name, email = :email, phone = :phone, address1 = :address1, address2 = :address2, city = :city, state = :state, zip = :zip, social = :social, credit_company = :credit_company, credit_company_user = :credit_company_user, credit_company_password = :credit_company_password, credit_company_code = :credit_company_code WHERE aid = :aid LIMIT 1";
+                    $statement = $conn->prepare($query);
+                    $affected = $statement->executeStatement([
+                        "first_name" => $data['first_name'],
+                        "last_name" => $data['last_name'],
+                        "email" => $data['email'],
+                        "phone" => $data['phone'],
+                        "address1" => $data['address1'],
+                        "address2" => $data['address2'],
+                        "city" => $data['city'],
+                        "state" => $data['state'],
+                        "zip" => $data['zip'],
+                        "social" => $data['social'],
+                        "credit_company" => $data['credit_company'],
+                        "credit_company_user" => $data['credit_company_user'],
+                        "credit_company_password" => $data['credit_company_password'],
+                        "credit_company_code" => $data['credit_company_code'],
+                        "aid" => $aid,
+                    ]);
+                    if($affected >= 0) {
+                        $messages[] = "Account sucessfully udpated!";
+                    } else {
+                        $errors[] = "Failed to update record. Contact admin";
+                    }
                 }
             }
 
