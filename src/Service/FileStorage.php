@@ -7,7 +7,7 @@ use Symfony\Component\HttpKernel\KernelInterface;
 
 class FileStorage
 {
-    private $projectDir;
+    private readonly string $projectDir;
 
     public function __construct(KernelInterface $kernel)
     {
