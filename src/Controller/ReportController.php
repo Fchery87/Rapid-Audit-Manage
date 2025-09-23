@@ -337,11 +337,27 @@ class ReportController extends AbstractController
 
     private function emailExists(string $email, ?int $excludeAid = null): bool
     {
-        $sql = 'SELECT COUNT(*) FROM accounts WHERE (email = :encryptedEmail OR email = :plainEmail)';
+        $lookup = $this->protector->buildLookupValues($email);
+
+        $conditions = ['email = :plainEmail'];
         $params = [
-            'encryptedEmail' => $this->protector->encryptValue($email),
             'plainEmail' => $email,
         ];
+
+        if ($lookup['pattern'] !== '') {
+            $conditions[] = 'email LIKE :encryptedEmailPattern';
+            $params['encryptedEmailPattern'] = $lookup['pattern'];
+        }
+
+        if ($lookup['legacy'] !== '') {
+            $conditions[] = 'email = :legacyEncryptedEmail';
+            $params['legacyEncryptedEmail'] = $lookup['legacy'];
+        }
+
+        $sql = sprintf(
+            'SELECT COUNT(*) FROM accounts WHERE (%s)',
+            implode(' OR ', $conditions)
+        );
 
         if ($excludeAid !== null) {
             $sql .= ' AND aid <> :aid';

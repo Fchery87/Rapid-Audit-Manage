@@ -67,6 +67,14 @@ class SensitiveDataProtector
         return $this->encryption->encrypt($value);
     }
 
+    /**
+     * @return array{pattern: string, legacy: string}
+     */
+    public function buildLookupValues(string $value): array
+    {
+        return $this->encryption->buildLookupValues($value);
+    }
+
     public function decryptValue(string $value): string
     {
         return $this->encryption->decrypt($value);
