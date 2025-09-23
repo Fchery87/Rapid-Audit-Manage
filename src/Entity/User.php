@@ -3,11 +3,11 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
- * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
+ * @ORM\Entity(repositoryClass="App\\Repository\\UserRepository")
  */
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
@@ -16,22 +16,32 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
      */
-    private $id;
+    private ?int $id = null;
 
     /**
      * @ORM\Column(type="string", length=255, unique=true)
      */
-    private $username;
+    private string $username = '';
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $password;
+    private string $password = '';
 
     /**
      * @ORM\Column(type="string", length=255, unique=true)
      */
-    private $email;
+    private string $email = '';
+
+    /**
+     * @ORM\Column(type="json")
+     */
+    private array $roles = ['ROLE_USER'];
+
+    /**
+     * @ORM\Column(name="mfa_secret", type="string", length=255, nullable=true)
+     */
+    private ?string $mfaSecret = null;
 
     public function getId(): ?int
     {
@@ -40,10 +50,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getUserIdentifier(): string
     {
-        return (string) $this->username;
+        return $this->username;
     }
 
-    // Kept for BC where referenced in code
     public function getUsername(): ?string
     {
         return $this->username;
@@ -82,13 +91,46 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getRoles(): array
     {
-        return [
-            'ROLE_USER',
-        ];
+        $roles = $this->roles;
+        $roles[] = 'ROLE_USER';
+
+        return array_values(array_unique($roles));
+    }
+
+    public function setRoles(array $roles): self
+    {
+        $this->roles = array_values(array_unique(array_map('strtoupper', $roles)));
+
+        return $this;
+    }
+
+    public function addRole(string $role): self
+    {
+        $this->roles[] = strtoupper($role);
+        $this->roles = array_values(array_unique($this->roles));
+
+        return $this;
+    }
+
+    public function getMfaSecret(): ?string
+    {
+        return $this->mfaSecret;
+    }
+
+    public function setMfaSecret(?string $mfaSecret): self
+    {
+        $this->mfaSecret = $mfaSecret;
+
+        return $this;
+    }
+
+    public function isMfaEnabled(): bool
+    {
+        return $this->mfaSecret !== null && $this->mfaSecret !== '';
     }
 
     public function eraseCredentials(): void
     {
-        // If you store any temporary, sensitive data on the user, clear it here
+        // No-op: passwords are hashed and MFA secrets are stored at rest.
     }
 }

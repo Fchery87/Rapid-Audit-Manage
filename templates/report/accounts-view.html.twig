@@ -152,12 +152,20 @@
                                     </tr>         
                                     <tr>
                                         <td><strong>Credit Reporting Password:</strong></td>
-                                        <td>{{ account_info.credit_company_password }}</td>
-                                    </tr>      
+                                        <td>
+                                            {% if account_info.credit_company_password is not empty %}
+                                                ••••••
+                                            {% endif %}
+                                        </td>
+                                    </tr>
                                     <tr>
                                         <td><strong>Credit Reporting Security Code:</strong></td>
-                                        <td>{{ account_info.credit_company_code }}</td>
-                                    </tr>            
+                                        <td>
+                                            {% if account_info.credit_company_code is not empty %}
+                                                ••••
+                                            {% endif %}
+                                        </td>
+                                    </tr>
                                     <tr>
                                         <td colspan="2"><a href="/accounts-edit?aid={{ account_info.aid }}">Edit</a></td>
                                     </tr>                                                                 

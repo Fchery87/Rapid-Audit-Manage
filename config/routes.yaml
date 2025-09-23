@@ -1,7 +1,3 @@
-#index:
-#    path: /
-#    controller: App\Controller\DefaultController::index
-
 app_root:
     path: /
     defaults:
@@ -9,50 +5,6 @@ app_root:
         path: /accounts
         permanent: true
 
-app_upload:
-  path: /upload
-  controller: App\Controller\ReportController::__init
-
-app_parse_html:
-  path: /html-report
-  controller: App\Controller\ParserController::__init
-
-app_parse_html_dev:
-  path: /parse-html-raw
-  controller: App\Controller\ParserController::__init_raw
-
-app_account_list:
-  path: /accounts
-  controller: App\Controller\ReportController::Accounts
-
-app_account_add:
-  path: /accounts-add
-  controller: App\Controller\ReportController::add_Accounts
-
-app_account_view:
-  path: /accounts-view
-  controller: App\Controller\ReportController::view_Accounts
-
-app_account_edit:
-  path: /accounts-edit
-  controller: App\Controller\ReportController::edit_Accounts
-
-app_login:
-  path: /login
-  controller: App\Controller\SecurityController::login
-
-app_logout:
-  path: /logout
-  controller: App\Controller\SecurityController::logout
-
-app_dashboard:
-  path: /dashboard
-  controller: App\Controller\ReportController::dashboard
-
-app_simple_audit:
-  path: /simple-audit
-  controller: App\Controller\AuditController::view
-
-app_simple_audit_pdf:
-  path: /simple-audit.pdf
-  controller: App\Controller\AuditController::pdf
+controllers:
+    resource: ../src/Controller/
+    type: attribute
