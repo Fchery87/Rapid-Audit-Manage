@@ -1,0 +1,237 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dispute Workflow – {{ account.first_name }} {{ account.last_name }}{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        body { font-family: Arial, sans-serif; margin: 24px; background: #f6f8fb; color: #222; }
+        h1, h2, h3 { color: #12355b; }
+        a { color: #0a58ca; }
+        .layout { display: grid; grid-template-columns: 2fr 1fr; gap: 18px; }
+        .card { background: #fff; border-radius: 8px; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.1); padding: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th, td { padding: 8px 10px; border-bottom: 1px solid #e5e7eb; font-size: 14px; text-align: left; }
+        th { background: #f1f5f9; text-transform: uppercase; font-size: 12px; letter-spacing: .05em; }
+        .tag { display: inline-block; background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 999px; font-size: 12px; }
+        .status-done { color: #047857; }
+        .status-open { color: #dc2626; }
+        .status-in_progress { color: #d97706; }
+        form.inline { display: inline; }
+        label { font-weight: 600; display: block; margin-top: 12px; font-size: 13px; }
+        input[type="text"], input[type="date"], textarea, select { width: 100%; padding: 8px; border: 1px solid #cbd5f5; border-radius: 6px; }
+        textarea { min-height: 90px; }
+        button { background: #2563eb; color: #fff; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; margin-top: 12px; }
+        button:hover { background: #1d4ed8; }
+        .muted { color: #64748b; font-size: 13px; }
+        .grid-two { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .letters pre { background: #0f172a; color: #e2e8f0; padding: 12px; border-radius: 6px; white-space: pre-wrap; max-height: 240px; overflow-y: auto; }
+        .flash { padding: 10px 14px; border-radius: 6px; margin-bottom: 16px; font-size: 14px; }
+        .flash-success { background: #dcfce7; color: #166534; }
+        .flash-error { background: #fee2e2; color: #b91c1c; }
+        .flash-info { background: #dbeafe; color: #1d4ed8; }
+        ul.bureaus { list-style: none; padding-left: 0; display: flex; gap: 8px; }
+        ul.bureaus li { background: #ede9fe; color: #5b21b6; padding: 2px 8px; border-radius: 999px; font-size: 12px; }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <h1>Dispute Workflow – {{ account.first_name }} {{ account.last_name }}</h1>
+    <p class="muted">
+        Tracking dispute plan aligned with the latest Simple Audit.
+        {% if report_file %}
+            View <a href="{{ path('app_simple_audit', { file: report_file }) }}">Simple Audit summary</a>.
+        {% endif %}
+    </p>
+    <p class="muted">
+        Client contact: {{ account.email ?? 'N/A' }}{% if account.phone %} • {{ account.phone }}{% endif %}
+        {% if account.city %}• {{ account.city }}, {{ account.state }} {{ account.zip }}{% endif %}
+    </p>
+
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="flash flash-{{ label }}">{{ message }}</div>
+        {% endfor %}
+    {% endfor %}
+
+    <div class="layout">
+        <div class="card">
+            <h2>Case Overview</h2>
+            <p><strong>Status:</strong> <span class="tag">{{ case.status|title }}</span></p>
+            <p>{{ case.summary }}</p>
+            <div class="grid-two">
+                <div>
+                    <h3>Progress</h3>
+                    <p class="muted">{{ case.progress.completed }} of {{ case.progress.total }} tasks complete ({{ case.progress.percent }}%).</p>
+                    <p class="muted">Client-facing tasks: {{ case.progress.open_client_tasks }} open.</p>
+                </div>
+                <div>
+                    <h3>Targets</h3>
+                    {% if recommended_items %}
+                        <ul class="bureaus">
+                            {% for item in recommended_items %}
+                                <li>{{ item.account }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="muted">No targets identified yet. Import a report to seed recommendations.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <h3 style="margin-top: 18px;">Open Tasks</h3>
+            <table>
+                <thead>
+                <tr>
+                    <th>Task</th>
+                    <th>Assigned</th>
+                    <th>Due</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for task in tasks %}
+                    <tr>
+                        <td>{{ task.description }}</td>
+                        <td>{{ task.assigned_to }}</td>
+                        <td>{{ task.due_at ? task.due_at|date('Y-m-d') : '—' }}</td>
+                        <td class="status-{{ task.status }}">{{ task.status|replace({'_':' '})|title }}</td>
+                        <td>
+                            <form class="inline" method="post" action="{{ path('app_dispute_task_status', { taskId: task.id }) }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('task_status_' ~ task.id) }}">
+                                <input type="hidden" name="account_aid" value="{{ account.aid }}">
+                                <select name="status">
+                                    <option value="open" {% if task.status == 'open' %}selected{% endif %}>Open</option>
+                                    <option value="in_progress" {% if task.status == 'in_progress' %}selected{% endif %}>In progress</option>
+                                    <option value="done" {% if task.status == 'done' %}selected{% endif %}>Done</option>
+                                </select>
+                                <button type="submit">Update</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="5">No workflow tasks yet.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+            <h3 style="margin-top: 24px;">Add Task</h3>
+            <form method="post" action="{{ path('app_dispute_task_create', { aid: account.aid }) }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('create_task_' ~ account.aid) }}">
+                <input type="hidden" name="case_id" value="{{ case.id }}">
+                <label for="task-description">Description</label>
+                <textarea id="task-description" name="description" required></textarea>
+                <label for="task-assigned">Assigned to</label>
+                <select id="task-assigned" name="assigned_to">
+                    <option value="Analyst">Analyst</option>
+                    <option value="Client">Client</option>
+                </select>
+                <label>Client visible
+                    <input type="checkbox" name="client_visible" checked>
+                </label>
+                <label for="task-due">Due date</label>
+                <input id="task-due" type="date" name="due_at">
+                <button type="submit">Add task</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>Notes & Collaboration</h2>
+            <form method="post" action="{{ path('app_dispute_note_create', { aid: account.aid }) }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('add_note_' ~ account.aid) }}">
+                <input type="hidden" name="case_id" value="{{ case.id }}">
+                <label for="note-message">Add update</label>
+                <textarea id="note-message" name="message" required></textarea>
+                <label for="note-visibility">Visibility</label>
+                <select id="note-visibility" name="visibility">
+                    <option value="internal">Internal</option>
+                    <option value="client">Client</option>
+                </select>
+                <button type="submit">Save note</button>
+            </form>
+
+            <h3 style="margin-top: 18px;">Recent notes</h3>
+            {% if notes %}
+                <ul class="muted" style="list-style:none;padding:0;">
+                    {% for note in notes %}
+                        <li style="margin-bottom:10px;">
+                            <strong>{{ note.author }}</strong>
+                            <span class="muted">{{ note.created_at|date('Y-m-d H:i') }}</span>
+                            <span class="tag">{{ note.visibility|title }}</span>
+                            <div>{{ note.message }}</div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="muted">No notes yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="layout" style="margin-top: 18px;">
+        <div class="card letters">
+            <h2>Letter Generator</h2>
+            <p class="muted">Select the bureaus and derogatory items to assemble a dispute letter with recommended talking points.</p>
+            <form method="post" action="{{ path('app_dispute_letter_create', { aid: account.aid }) }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('prepare_letter_' ~ account.aid) }}">
+                <input type="hidden" name="case_id" value="{{ case.id }}">
+                <label for="letter-bureau">Target bureau</label>
+                <select id="letter-bureau" name="bureau">
+                    <option value="TransUnion">TransUnion</option>
+                    <option value="Experian">Experian</option>
+                    <option value="Equifax">Equifax</option>
+                </select>
+
+                <h3 style="margin-top:14px;">Dispute items</h3>
+                {% if recommended_items %}
+                    {% for item in recommended_items %}
+                        <label style="font-weight:normal;">
+                            <input type="checkbox" name="items[]" value="{{ loop.index0 }}" checked>
+                            <strong>{{ item.account }}</strong> – {{ item.issue }}
+                            <span class="muted">({{ item.bureaus|join(', ') }})</span>
+                        </label>
+                    {% endfor %}
+                {% else %}
+                    <p class="muted">No derogatory items are tracked for this case.</p>
+                {% endif %}
+                <label style="margin-top: 12px;">
+                    <input type="checkbox" name="mark_sent">
+                    Mark letter as sent upon creation
+                </label>
+                <button type="submit">Generate letter</button>
+            </form>
+
+            <h3 style="margin-top: 18px;">Recent letters</h3>
+            {% if letters %}
+                {% for letter in letters %}
+                    <div style="margin-bottom: 16px;">
+                        <div><strong>{{ letter.bureau }}</strong> – {{ letter.status|title }} ({{ letter.created_at|date('Y-m-d') }})</div>
+                        {% if letter.sent_at %}
+                            <div class="muted">Sent {{ letter.sent_at|date('Y-m-d H:i') }}</div>
+                        {% else %}
+                            <form class="inline" method="post" action="{{ path('app_dispute_letter_send', { letterId: letter.id }) }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('send_letter_' ~ letter.id) }}">
+                                <input type="hidden" name="account_aid" value="{{ account.aid }}">
+                                <button type="submit">Mark sent</button>
+                            </form>
+                        {% endif %}
+                        <pre>{{ letter.body }}</pre>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="muted">No letters have been drafted for this case.</p>
+            {% endif %}
+        </div>
+
+        <div class="card">
+            <h2>Client Collaboration Summary</h2>
+            <p class="muted">Share these action items with the client to keep progress aligned with the Simple Audit roadmap.</p>
+            <ul>
+                <li>Client-facing tasks open: {{ case.progress.open_client_tasks }}</li>
+                <li>Recommended targets: {{ recommended_items|length }}</li>
+                <li>Latest audit file: {% if report_file %}<a href="{{ path('app_simple_audit', { file: report_file }) }}">{{ report_file }}</a>{% else %}N/A{% endif %}</li>
+            </ul>
+            <p class="muted">Use the notes panel to capture commitments and call outcomes. Letters are stored with generated language for quick export.</p>
+        </div>
+    </div>
+{% endblock %}

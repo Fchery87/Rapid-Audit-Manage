@@ -200,10 +200,29 @@
                 <li>Keep existing accounts open and pay on time.</li>
             </ol>
             <div class="cta">
-                To proceed, upload your latest credit report and schedule a follow-up to review updates. 
+                To proceed, upload your latest credit report and schedule a follow-up to review updates.
                 {% if not is_pdf %}Use the full report at <a href="/html-report?file={{ report_file|url_encode }}">Credit Analysis Report</a>.{% endif %}
             </div>
         </div>
+
+        {% if dispute_workflow is defined %}
+            <div class="card">
+                <h2>Dispute Workflow Snapshot</h2>
+                <p class="muted">Case status: <strong>{{ dispute_workflow.case.status|title }}</strong></p>
+                <p>Tasks complete: <strong>{{ dispute_workflow.case.progress.completed }}/{{ dispute_workflow.case.progress.total }}</strong> ({{ dispute_workflow.case.progress.percent }}%).</p>
+                <p>Client-facing tasks open: <strong>{{ dispute_workflow.case.progress.open_client_tasks }}</strong></p>
+                {% if dispute_workflow.recommended_items|length > 0 %}
+                    {% set targetNames = [] %}
+                    {% for item in dispute_workflow.recommended_items|slice(0,3) %}
+                        {% set targetNames = targetNames|merge([item.account]) %}
+                    {% endfor %}
+                    <p class="muted">Top targets: {{ targetNames|join(', ') }}</p>
+                {% endif %}
+                {% if not is_pdf %}
+                    <p><a class="btn" href="{{ path('app_dispute_dashboard', { aid: account.aid }) }}">Open dispute workspace</a></p>
+                {% endif %}
+            </div>
+        {% endif %}
 
         <div class="card">
             <h2>Contact</h2>

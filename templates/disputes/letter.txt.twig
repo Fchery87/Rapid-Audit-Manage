@@ -1,0 +1,28 @@
+{{ generatedAt|date('F j, Y') }}
+
+{{ account.first_name }} {{ account.last_name }}
+{{ account.address1|default('') }}
+{% if account.address2 is not empty %}{{ account.address2 }}
+{% endif %}{{ account.city|default('') }}, {{ account.state|default('') }} {{ account.zip|default('') }}
+Phone: {{ account.phone|default('N/A') }}
+Email: {{ account.email|default('N/A') }}
+
+{{ bureau ?? 'Credit Bureau' }}
+Re: Dispute for {{ account.first_name }} {{ account.last_name }}
+
+To whom it may concern,
+
+I am writing on behalf of {{ account.first_name }} {{ account.last_name }} to dispute the accuracy of the items listed below. We have reviewed the Simple Audit findings (report dated {{ client.trans_union.report_data|default('N/A') }}) and identified information that is incomplete or inaccurate according to the Fair Credit Reporting Act.
+
+{% for item in items %}
+- {{ item.account }} — {{ item.issue }}{% if item.trans_union_account_date %} (reported {{ item.trans_union_account_date }}){% endif %}
+  Requested action: investigate with {{ (item.bureaus ?? [])|join(', ') }} and provide written verification.
+{% endfor %}
+
+Summary of dispute case: {{ case.summary }}
+
+Supporting documentation and identity verification are enclosed. Please correct or remove the referenced items within 30 days and confirm receipt in writing to our office.
+
+Sincerely,
+{{ preparedBy }}
+on behalf of the {{ case.title }} Team

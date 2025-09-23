@@ -2,126 +2,139 @@
 
 namespace App\Controller;
 
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpFoundation\Request;
-use Doctrine\Persistence\ManagerRegistry;
+use App\Security\SensitiveDataProtector;
 use App\Service\FileStorage;
 use App\Service\ReportParser;
+use Doctrine\DBAL\Connection;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
+#[IsGranted('ROLE_ANALYST')]
 class ParserController extends AbstractController
 {
-    public function __init(Request $request, FileStorage $storage, ReportParser $parser, ManagerRegistry $doctrine)
-    {
-        if (!$request->query->has('file')) {
-            throw new NotFoundHttpException('File not found!');
-        }
-
-        $fileName = urldecode($request->query->get('file'));
-        try {
-            $absolutePath = $storage->resolvePath($fileName);
-        } catch (\RuntimeException $e) {
-            throw new NotFoundHttpException('File not found!');
-        }
-
-        $account_details = $this->get_account_details($doctrine, $fileName);
-        if (!$account_details) {
-            throw new NotFoundHttpException('Account details not found for file.');
-        }
-
-        $parsed = $parser->loadReportData($absolutePath);
-        $client_data = $parsed['client_data'];
-        $derogatory_accounts = $parsed['derogatory_accounts'];
-        $inquiry_accounts = $parsed['inquiry_accounts'];
-        $public_records = $parsed['public_records'];
-        $credit_info = $parsed['credit_info'];
-
-        return $this->render('credit-report.html.twig', [
-            "first_name"    =>  $account_details['first_name'],
-            "last_name"     =>  $account_details['last_name'],
-            'name' => $client_data->trans_union['name'],
-            'report_date' => $client_data->trans_union['report_data'],
-            "transunion_credit_score" => $client_data->trans_union['credit_score'],
-            "equifax_credit_score" => $client_data->equifax['credit_score'],
-            "experian_credit_score" => $client_data->experian['credit_score'],
-            "equifax_delinquent" => $client_data->equifax['delinquent'],
-            "experian_delinquent" => $client_data->experian['delinquent'],
-            "transunion_delinquent" => $client_data->trans_union['delinquent'],
-            "equifax_derogatory" =>  $client_data->equifax['derogatory'],
-            "experian_derogatory" =>  $client_data->experian['derogatory'],
-            "transunion_derogatory" =>  $client_data->trans_union['derogatory'],
-            "equifax_collection" =>  $client_data->equifax['collection'],
-            "experian_collection" =>  $client_data->experian['collection'],
-            "transunion_collection" =>  $client_data->trans_union['collection'],
-            "equifax_public_records" =>  $client_data->equifax['public_records'],
-            "experian_public_records" =>  $client_data->experian['public_records'],
-            "transunion_public_records" =>  $client_data->trans_union['public_records'],
-            "equifax_inquiries" =>  $client_data->equifax['inquiries'],
-            "experian_inquiries" =>  $client_data->experian['inquiries'],
-            "transunion_inquiries" =>  $client_data->trans_union['inquiries'],
-            "derogatory_accounts" => $derogatory_accounts['accounts'],
-            "derogatory_accounts_total" =>  $derogatory_accounts['total'],
-            "inquiry_accounts"  =>  $inquiry_accounts["accounts"],
-            "inquiry_total" =>  $inquiry_accounts["total"],
-            "equifax_open_accounts" =>  $client_data->equifax['open_accounts'],
-            "transunion_open_accounts" =>  $client_data->trans_union['open_accounts'],
-            "experian_open_accounts" =>  $client_data->experian['open_accounts'],
-            "equifax_total_accounts" =>  $client_data->equifax['total_accounts'],
-            "transunion_total_accounts" =>  $client_data->trans_union['total_accounts'],
-            "experian_total_accounts" =>  $client_data->experian['total_accounts'],
-            "equifax_closed_accounts" =>  $client_data->equifax['closed_accounts'],
-            "transunion_closed_accounts" =>  $client_data->trans_union['closed_accounts'],
-            "experian_closed_accounts" =>  $client_data->experian['closed_accounts'],
-            "equifax_balances" =>  $client_data->equifax['balances'],
-            "transunion_balances" =>  $client_data->trans_union['balances'],
-            "experian_balances" =>  $client_data->experian['balances'],
-            "equifax_payments" =>  $client_data->equifax['payments'],
-            "transunion_payments" =>  $client_data->trans_union['payments'],
-            "experian_payments" =>  $client_data->experian['payments'],
-            "public_records"    =>  $public_records['records'],
-            "public_records_total"  =>  $public_records['total'],
-            "credit_info"   => $credit_info,
-        ]);
+    public function __construct(
+        private readonly FileStorage $storage,
+        private readonly ReportParser $parser,
+        private readonly EntityManagerInterface $entityManager,
+        private readonly SensitiveDataProtector $protector,
+    ) {
     }
 
-    public function __init_raw(Request $request, FileStorage $storage, ReportParser $parser)
+    #[Route('/html-report', name: 'app_parse_html', methods: ['GET'])]
+    public function showReport(Request $request): Response
     {
-
-        $fileParam = $request->query->get('file');
-        if (!$fileParam) {
+        $fileName = $request->query->get('file');
+        if (!$fileName) {
             throw new NotFoundHttpException('File not specified');
         }
 
         try {
-            $absolutePath = $storage->resolvePath($fileParam);
+            $absolutePath = $this->storage->resolvePath($fileName);
         } catch (\RuntimeException $e) {
             throw new NotFoundHttpException('File not found!');
         }
 
-        $parsed = $parser->loadReportData($absolutePath);
-
-        $response = new Response();
-        $response->setContent(json_encode($parsed));
-        $response->headers->set('Content-Type', 'application/json');
-
-        return $response;
-
-    }
-
-    private function get_account_details(ManagerRegistry $doctrine, $file = null)
-    {
-        if ($file) {
-            $em = $doctrine->getManager();
-            $conn = $em->getConnection();
-            $query = "SELECT first_name, last_name FROM accounts a INNER JOIN account_files f ON f.aid = a.aid WHERE f.filename = :filename";
-            $statement = $conn->prepare($query);
-            $rows = $statement->executeQuery(['filename' => $file])->fetchAllAssociative();
-            return $rows[0] ?? null;
+        $account = $this->getAccountDetails($fileName);
+        if (!$account) {
+            throw new NotFoundHttpException('Account details not found for file.');
         }
 
-        return null;
+        $parsedReport = $this->parser->parse($absolutePath);
+        $payload = $parsedReport->toArray();
+        $clientData = $payload['client_data'];
+        $derogatoryAccounts = $payload['derogatory_accounts'];
+        $inquiryAccounts = $payload['inquiry_accounts'];
+        $publicRecords = $payload['public_records'];
+        $creditInfo = $payload['credit_info'];
+
+        return $this->render('credit-report.html.twig', [
+            'first_name' => $account['first_name'],
+            'last_name' => $account['last_name'],
+            'name' => $clientData['trans_union']['name'] ?? null,
+            'report_date' => $clientData['trans_union']['report_data'] ?? null,
+            'transunion_credit_score' => $clientData['trans_union']['credit_score'] ?? null,
+            'equifax_credit_score' => $clientData['equifax']['credit_score'] ?? null,
+            'experian_credit_score' => $clientData['experian']['credit_score'] ?? null,
+            'equifax_delinquent' => $clientData['equifax']['delinquent'] ?? null,
+            'experian_delinquent' => $clientData['experian']['delinquent'] ?? null,
+            'transunion_delinquent' => $clientData['trans_union']['delinquent'] ?? null,
+            'equifax_derogatory' => $clientData['equifax']['derogatory'] ?? null,
+            'experian_derogatory' => $clientData['experian']['derogatory'] ?? null,
+            'transunion_derogatory' => $clientData['trans_union']['derogatory'] ?? null,
+            'equifax_collection' => $clientData['equifax']['collection'] ?? null,
+            'experian_collection' => $clientData['experian']['collection'] ?? null,
+            'transunion_collection' => $clientData['trans_union']['collection'] ?? null,
+            'equifax_public_records' => $clientData['equifax']['public_records'] ?? null,
+            'experian_public_records' => $clientData['experian']['public_records'] ?? null,
+            'transunion_public_records' => $clientData['trans_union']['public_records'] ?? null,
+            'equifax_inquiries' => $clientData['equifax']['inquiries'] ?? null,
+            'experian_inquiries' => $clientData['experian']['inquiries'] ?? null,
+            'transunion_inquiries' => $clientData['trans_union']['inquiries'] ?? null,
+            'derogatory_accounts' => $derogatoryAccounts['accounts'],
+            'derogatory_accounts_total' => $derogatoryAccounts['total'],
+            'inquiry_accounts' => $inquiryAccounts['accounts'],
+            'inquiry_total' => $inquiryAccounts['total'],
+            'equifax_open_accounts' => $clientData['equifax']['open_accounts'] ?? null,
+            'transunion_open_accounts' => $clientData['trans_union']['open_accounts'] ?? null,
+            'experian_open_accounts' => $clientData['experian']['open_accounts'] ?? null,
+            'equifax_total_accounts' => $clientData['equifax']['total_accounts'] ?? null,
+            'transunion_total_accounts' => $clientData['trans_union']['total_accounts'] ?? null,
+            'experian_total_accounts' => $clientData['experian']['total_accounts'] ?? null,
+            'equifax_closed_accounts' => $clientData['equifax']['closed_accounts'] ?? null,
+            'transunion_closed_accounts' => $clientData['trans_union']['closed_accounts'] ?? null,
+            'experian_closed_accounts' => $clientData['experian']['closed_accounts'] ?? null,
+            'equifax_balances' => $clientData['equifax']['balances'] ?? null,
+            'transunion_balances' => $clientData['trans_union']['balances'] ?? null,
+            'experian_balances' => $clientData['experian']['balances'] ?? null,
+            'equifax_payments' => $clientData['equifax']['payments'] ?? null,
+            'transunion_payments' => $clientData['trans_union']['payments'] ?? null,
+            'experian_payments' => $clientData['experian']['payments'] ?? null,
+            'public_records' => $publicRecords['records'],
+            'public_records_total' => $publicRecords['total'],
+            'credit_info' => $creditInfo,
+            'meta' => $payload['meta'],
+        ]);
+    }
+
+    #[Route('/parse-html-raw', name: 'app_parse_html_raw', methods: ['GET'])]
+    public function showRawReport(Request $request): JsonResponse
+    {
+        $fileName = $request->query->get('file');
+        if (!$fileName) {
+            throw new NotFoundHttpException('File not specified');
+        }
+
+        try {
+            $absolutePath = $this->storage->resolvePath($fileName);
+        } catch (\RuntimeException $e) {
+            throw new NotFoundHttpException('File not found!');
+        }
+
+        $parsedReport = $this->parser->parse($absolutePath);
+
+        return $this->json($parsedReport->toArray());
+    }
+
+    private function connection(): Connection
+    {
+        return $this->entityManager->getConnection();
+    }
+
+    private function getAccountDetails(string $fileName): ?array
+    {
+        $sql = 'SELECT first_name, last_name FROM accounts a INNER JOIN account_files f ON f.aid = a.aid WHERE f.filename = :filename';
+
+        $result = $this->connection()->executeQuery($sql, ['filename' => $fileName]);
+
+        $account = $result->fetchAssociative() ?: null;
+
+        return $account ? $this->protector->decryptAccountRecord($account) : null;
     }
 }
 
-?>
