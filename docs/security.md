@@ -31,3 +31,8 @@ Operational Security:
 Monitoring & Incident Response:
 - Integrate error tracking (e.g., Sentry) and structured logging
 - Document incident response steps in runbooks
+
+Logging & Observability Controls:
+- Application events emit structured JSON logs via Monolog with dedicated `audit.log` and `monitoring.log` streams.
+- Security-sensitive actions (client document handling, task acknowledgements, account maintenance, report access) are persisted to the `audit_log_entries` table through the `AuditTrailService`.
+- `/healthz` exposes a JSON health probe that checks database connectivity, log writability, and secure storage capacity for monitoring systems.

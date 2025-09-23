@@ -11,6 +11,7 @@ use App\Repository\DisputeTaskRepository;
 use App\Service\Account\AccountLocator;
 use App\Service\Client\ClientDocumentStorage;
 use App\Service\Dispute\DisputeWorkflowService;
+use App\Service\Security\AuditTrailService;
 use InvalidArgumentException;
 use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -39,6 +40,7 @@ class ClientPortalController extends AbstractController
         private readonly DisputeWorkflowService $workflow,
         private readonly ClientDocumentRepository $documents,
         private readonly ClientDocumentStorage $storage,
+        private readonly AuditTrailService $auditTrail,
     ) {
     }
 
@@ -104,6 +106,7 @@ class ClientPortalController extends AbstractController
         }
 
         $this->workflow->acknowledgeTask($task, $user->getUserIdentifier());
+        $this->auditTrail->recordClientTaskAcknowledged($task, $user->getUserIdentifier());
         $this->addFlash('success', 'client.dashboard.flash_acknowledged');
 
         return $this->redirectToRoute('app_client_dashboard', ['aid' => $accountAid]);
@@ -129,7 +132,8 @@ class ClientPortalController extends AbstractController
         }
 
         try {
-            $this->storage->store($file, $accountAid, $user->getUserIdentifier());
+            $document = $this->storage->store($file, $accountAid, $user->getUserIdentifier());
+            $this->auditTrail->recordClientDocumentUploaded($document, $user->getUserIdentifier());
             $this->addFlash('success', 'client.dashboard.flash_upload_success');
         } catch (RuntimeException $exception) {
             $this->addFlash('error', $exception->getMessage());
@@ -155,11 +159,15 @@ class ClientPortalController extends AbstractController
             throw new NotFoundHttpException($exception->getMessage(), $exception);
         }
 
-        return $this->file(
+        $response = $this->file(
             $path,
             $document->getOriginalName(),
             ResponseHeaderBag::DISPOSITION_ATTACHMENT
         );
+
+        $this->auditTrail->recordClientDocumentDownloaded($document, $user->getUserIdentifier());
+
+        return $response;
     }
 
     #[Route('/client/audits/{id}', name: 'app_client_audit_view', methods: ['GET'])]
@@ -174,7 +182,7 @@ class ClientPortalController extends AbstractController
         $accountAid = $report->getAccountAid();
         $account = $this->requireAccount($user, $accountAid);
 
-        return $this->render('client/audit.html.twig', [
+        $response = $this->render('client/audit.html.twig', [
             'report' => $report,
             'account' => $account,
             'client_data' => $report->getClientData(),
@@ -183,6 +191,10 @@ class ClientPortalController extends AbstractController
             'public_records' => $report->getPublicRecords(),
             'credit_info' => $report->getCreditInfo(),
         ]);
+
+        $this->auditTrail->recordClientAuditView($report, $user->getUserIdentifier(), ['source' => 'portal']);
+
+        return $response;
     }
 
     private function requireClientUser(): User

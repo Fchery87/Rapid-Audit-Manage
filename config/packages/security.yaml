@@ -28,6 +28,7 @@ security:
                 target: /
 
     access_control:
+        - { path: ^/healthz, roles: PUBLIC_ACCESS }
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/admin, roles: ROLE_ADMIN }
         - { path: ^/client, roles: ROLE_CLIENT }

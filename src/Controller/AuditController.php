@@ -9,6 +9,7 @@ use App\Service\FileStorage;
 use App\Service\PdfRenderer;
 use App\Service\ReportParser;
 use App\Service\Dispute\DisputeWorkflowService;
+use App\Service\Security\AuditTrailService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,6 +17,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[IsGranted('ROLE_ANALYST')]
 class AuditController extends AbstractController
@@ -28,6 +30,7 @@ class AuditController extends AbstractController
         private readonly EntityManagerInterface $entityManager,
         private readonly AccountLocator $accounts,
         private readonly DisputeWorkflowService $workflow,
+        private readonly AuditTrailService $auditTrail,
     ) {
     }
 
@@ -60,7 +63,7 @@ class AuditController extends AbstractController
             ]
         );
 
-        return $this->render('report/simple-audit.html.twig', [
+        $response = $this->render('report/simple-audit.html.twig', [
             'account' => $account,
             'client_data' => $reportData['clientData'],
             'derogatory_accounts' => $reportData['derogatory'],
@@ -71,6 +74,15 @@ class AuditController extends AbstractController
             'meta' => $reportData['meta'],
             'dispute_workflow' => $disputeWorkflow,
         ]);
+
+        $this->auditTrail->recordAnalystReportViewed(
+            $this->resolveActorId(),
+            (int) $account['aid'],
+            $file,
+            ['format' => 'html']
+        );
+
+        return $response;
     }
 
     #[Route('/simple-audit.pdf', name: 'app_simple_audit_pdf', methods: ['GET'])]
@@ -115,10 +127,19 @@ class AuditController extends AbstractController
             'dispute_workflow' => $disputeWorkflow,
         ]);
 
-        return $this->pdfRenderer->renderPdfResponse(
+        $response = $this->pdfRenderer->renderPdfResponse(
             $html,
             sprintf('simple-audit-%s.pdf', $account['last_name'] ?? 'report')
         );
+
+        $this->auditTrail->recordAnalystReportViewed(
+            $this->resolveActorId(),
+            (int) $account['aid'],
+            $file,
+            ['format' => 'pdf']
+        );
+
+        return $response;
     }
 
     private function resolveReportData(string $file, string $absolutePath, int $accountAid): array
@@ -169,5 +190,15 @@ class AuditController extends AbstractController
         ];
     }
 
+    private function resolveActorId(): string
+    {
+        $user = $this->getUser();
+
+        if ($user instanceof UserInterface) {
+            return $user->getUserIdentifier();
+        }
+
+        return 'anonymous';
+    }
 }
 
