@@ -1,11 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App;
 
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
+use Symfony\Component\Config\Loader\LoaderInterface;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
-use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
-use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
+use Symfony\Component\Routing\RouteCollectionBuilder;
 
 class Kernel extends BaseKernel
 {
@@ -13,19 +16,33 @@ class Kernel extends BaseKernel
 
     private const CONFIG_EXTS = '.{php,xml,yaml,yml}';
 
-    protected function configureContainer(ContainerConfigurator $container): void
+    public function registerBundles(): iterable
     {
-        $container->import('../config/{packages}/*' . self::CONFIG_EXTS);
-        $container->import('../config/{packages}/' . $this->environment . '/**/*' . self::CONFIG_EXTS);
-
-        $container->import('../config/{services}' . self::CONFIG_EXTS);
-        $container->import('../config/{services}_' . $this->environment . self::CONFIG_EXTS);
+        $contents = require $this->getProjectDir() . '/config/bundles.php';
+        foreach ($contents as $class => $envs) {
+            if (($envs[$this->environment] ?? $envs['all'] ?? false) === true) {
+                yield new $class();
+            }
+        }
     }
 
-    protected function configureRoutes(RoutingConfigurator $routes): void
+    protected function configureContainer(ContainerBuilder $container, LoaderInterface $loader): void
     {
-        $routes->import('../config/{routes}/' . $this->environment . '/**/*' . self::CONFIG_EXTS);
-        $routes->import('../config/{routes}/*' . self::CONFIG_EXTS);
-        $routes->import('../config/{routes}' . self::CONFIG_EXTS);
+        $confDir = $this->getProjectDir() . '/config';
+
+        $loader->load($confDir . '/{packages}/*' . self::CONFIG_EXTS, 'glob');
+        $loader->load($confDir . '/{packages}/' . $this->environment . '/**/*' . self::CONFIG_EXTS, 'glob');
+
+        $loader->load($confDir . '/{services}' . self::CONFIG_EXTS, 'glob');
+        $loader->load($confDir . '/{services}_' . $this->environment . self::CONFIG_EXTS, 'glob');
+    }
+
+    protected function configureRoutes(RouteCollectionBuilder $routes): void
+    {
+        $confDir = $this->getProjectDir() . '/config';
+
+        $routes->import($confDir . '/{routes}/' . $this->environment . '/**/*' . self::CONFIG_EXTS, '/', 'glob');
+        $routes->import($confDir . '/{routes}/*' . self::CONFIG_EXTS, '/', 'glob');
+        $routes->import($confDir . '/{routes}' . self::CONFIG_EXTS, '/', 'glob');
     }
 }

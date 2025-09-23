@@ -1,0 +1,276 @@
+{
+    "meta": {
+        "source_name": "identityiq-sample.html",
+        "source_path": "/workspace/Rapid-Audit-Manage/tests/Fixtures/reports/identityiq-sample.html",
+        "checksum": "3a4422a7d359cd83d9a8425d8a711cf4afe878f816bdfba97a1b3a8d1af626f0",
+        "filesize": 2099010,
+        "parsed_at": "2025-09-23T20:55:49+00:00",
+        "parser_version": "2.0.0",
+        "sections": [
+            {
+                "name": "derogatory_accounts",
+                "total": 24,
+                "returned": 9,
+                "limit": 250,
+                "truncated": true
+            },
+            {
+                "name": "inquiry_accounts",
+                "total": 3,
+                "returned": 3,
+                "limit": 250,
+                "truncated": false
+            },
+            {
+                "name": "public_records",
+                "total": 0,
+                "returned": 0,
+                "limit": 250,
+                "truncated": false
+            }
+        ]
+    },
+    "client_data": {
+        "trans_union": {
+            "report_data": "07/19/2020 -",
+            "name": "TINA JONES -",
+            "also_known_as": "-",
+            "former_name": "-",
+            "date_of_birth": "5/5/1987 -",
+            "current_address": "348 D CHESTER ST BROOKLYN, NY 11212 -",
+            "previous_address": "15 FORD ST BROOKLYN, NY 11213 2041 1K PACIFIC ST BROOKLYN, NY 11233 -",
+            "employers": "ALPHARETTA PAL SUNY DOWN STAE -",
+            "credit_score": "513",
+            "lending_rank": "Unfavorable",
+            "score_scale": "300-850",
+            "total_accounts": "34",
+            "open_accounts": "8",
+            "closed_accounts": "26",
+            "delinquent": "2",
+            "derogatory": "6",
+            "collection": "1",
+            "balances": "$148,008.00",
+            "payments": "$821.00",
+            "public_records": "0",
+            "inquiries": "1"
+        },
+        "experian": {
+            "report_data": "07/19/2020 -",
+            "name": "TINA JONES -",
+            "also_known_as": "-",
+            "former_name": "-",
+            "date_of_birth": "1987 -",
+            "current_address": "2400 PARKLAND DR NE UNIT 285 ATLANTA, GA 30324-7001 07/2019 -",
+            "previous_address": "348 CHESTER ST APT D BROOKLYN, NY 11212-5429 06/2018 45 N 18TH ST HARRISBURG, PA 17103-2503 06/2018 -",
+            "employers": "SUNY DOWN STAE SUNY DOWNSTATE -",
+            "credit_score": "513",
+            "lending_rank": "Unfavorable",
+            "score_scale": "300-850",
+            "total_accounts": "34",
+            "open_accounts": "8",
+            "closed_accounts": "26",
+            "delinquent": "2",
+            "derogatory": "7",
+            "collection": "2",
+            "balances": "$148,161.00",
+            "payments": "$821.00",
+            "public_records": "0",
+            "inquiries": "2"
+        },
+        "equifax": {
+            "report_data": "07/19/2020 -",
+            "name": "TINA JONES -",
+            "also_known_as": "-",
+            "former_name": "-",
+            "date_of_birth": "5/5/1987 -",
+            "current_address": "2400 PARKLAND DR NE UNIT 285 ATLANTA, GA 30324 -",
+            "previous_address": "45 N 18TH ST HARRISBURG, PA 17103 809 STILL HILL LN LAWRENCEVILLE, GA 30045 -",
+            "employers": "-",
+            "credit_score": "512",
+            "lending_rank": "Unfavorable",
+            "score_scale": "300-850",
+            "total_accounts": "36",
+            "open_accounts": "7",
+            "closed_accounts": "29",
+            "delinquent": "2",
+            "derogatory": "5",
+            "collection": "0",
+            "balances": "$147,493.00",
+            "payments": "$821.00",
+            "public_records": "0",
+            "inquiries": "0"
+        }
+    },
+    "credit_info": {
+        "trans_union_balance": "13,141.00",
+        "trans_union_limit": "15,300.00",
+        "trans_union_percent": 85.89,
+        "trans_union_percent_img": "credit-utilization-very-poor.jpg",
+        "experian_balance": "13,141.00",
+        "experian_limit": "15,300.00",
+        "experian_percent": 85.89,
+        "experian_percent_img": "credit-utilization-very-poor.jpg",
+        "equifax_balance": "13,141.00",
+        "equifax_limit": "15,300.00",
+        "equifax_percent": 85.89,
+        "equifax_percent_img": "credit-utilization-very-poor.jpg",
+        "total_balance": "13,141.00",
+        "total_limit": "15,300.00",
+        "total_percent": 85.89
+    },
+    "derogatory_accounts": {
+        "total": 24,
+        "limit": 250,
+        "returned": 9,
+        "accounts": [
+            {
+                "account": "JPMCB CARD",
+                "unique_status": "Late 30 Days",
+                "trans_union_account_status": "Closed",
+                "trans_union_account_date": "04/04/2018",
+                "trans_union_payment_status": "Late 30 Days",
+                "experian_account_status": "Closed",
+                "experian_account_date": "04/01/2018",
+                "experian_payment_status": "Late 30 Days",
+                "equifax_account_status": "Closed",
+                "equifax_account_date": "04/01/2018",
+                "equifax_payment_status": "Late 30 Days"
+            },
+            {
+                "account": "JPMCB CARD",
+                "unique_status": "Late 30 Days",
+                "trans_union_account_status": "Closed",
+                "trans_union_account_date": "12/24/2016",
+                "trans_union_payment_status": "Late 30 Days",
+                "experian_account_status": "Closed",
+                "experian_account_date": "12/01/2016",
+                "experian_payment_status": "Late 30 Days",
+                "equifax_account_status": "Closed",
+                "equifax_account_date": "12/01/2016",
+                "equifax_payment_status": "Late 30 Days"
+            },
+            {
+                "account": "SYNCB/OLDNAV",
+                "unique_status": "Collection/Chargeoff",
+                "trans_union_account_status": "Derogatory",
+                "trans_union_account_date": "05/01/2017",
+                "trans_union_payment_status": "Collection/Chargeoff",
+                "experian_account_status": "Derogatory",
+                "experian_account_date": "05/01/2017",
+                "experian_payment_status": "Collection/Chargeoff",
+                "equifax_account_status": "Derogatory",
+                "equifax_account_date": "05/01/2017",
+                "equifax_payment_status": "Collection/Chargeoff"
+            },
+            {
+                "account": "AFNI (Original Creditor: 11 AT T)",
+                "unique_status": "Collection/Chargeoff",
+                "trans_union_account_status": "Derogatory",
+                "trans_union_account_date": "04/01/2020",
+                "trans_union_payment_status": "Collection/Chargeoff",
+                "experian_account_status": "Derogatory",
+                "experian_account_date": "04/01/2020",
+                "experian_payment_status": "Collection/Chargeoff",
+                "equifax_account_status": "",
+                "equifax_account_date": "",
+                "equifax_payment_status": ""
+            },
+            {
+                "account": "SUNRISE CREDIT SERVICE (Original Creditor: OPTIMUM)",
+                "unique_status": "Collection/Chargeoff",
+                "trans_union_account_status": "",
+                "trans_union_account_date": "",
+                "trans_union_payment_status": "",
+                "experian_account_status": "Derogatory",
+                "experian_account_date": "07/01/2019",
+                "experian_payment_status": "Collection/Chargeoff",
+                "equifax_account_status": "",
+                "equifax_account_date": "",
+                "equifax_payment_status": ""
+            },
+            {
+                "account": "TARGET/TD",
+                "unique_status": "Collection/Chargeoff",
+                "trans_union_account_status": "Derogatory",
+                "trans_union_account_date": "02/25/2015",
+                "trans_union_payment_status": "Collection/Chargeoff",
+                "experian_account_status": "Derogatory",
+                "experian_account_date": "02/01/2015",
+                "experian_payment_status": "Collection/Chargeoff",
+                "equifax_account_status": "Derogatory",
+                "equifax_account_date": "02/01/2015",
+                "equifax_payment_status": "Collection/Chargeoff"
+            },
+            {
+                "account": "CITI",
+                "unique_status": "Collection/Chargeoff",
+                "trans_union_account_status": "Derogatory",
+                "trans_union_account_date": "02/14/2017",
+                "trans_union_payment_status": "Collection/Chargeoff",
+                "experian_account_status": "Derogatory",
+                "experian_account_date": "02/01/2017",
+                "experian_payment_status": "Collection/Chargeoff",
+                "equifax_account_status": "Derogatory",
+                "equifax_account_date": "02/01/2017",
+                "equifax_payment_status": "Collection/Chargeoff"
+            },
+            {
+                "account": "DSNB MACYS",
+                "unique_status": "Collection/Chargeoff",
+                "trans_union_account_status": "Derogatory",
+                "trans_union_account_date": "12/17/2016",
+                "trans_union_payment_status": "Collection/Chargeoff",
+                "experian_account_status": "Derogatory",
+                "experian_account_date": "12/01/2016",
+                "experian_payment_status": "Collection/Chargeoff",
+                "equifax_account_status": "Derogatory",
+                "equifax_account_date": "12/01/2016",
+                "equifax_payment_status": "Collection/Chargeoff"
+            },
+            {
+                "account": "BBY/CBNA",
+                "unique_status": "Collection/Chargeoff",
+                "trans_union_account_status": "Derogatory",
+                "trans_union_account_date": "11/12/2012",
+                "trans_union_payment_status": "Collection/Chargeoff",
+                "experian_account_status": "Derogatory",
+                "experian_account_date": "11/01/2012",
+                "experian_payment_status": "Collection/Chargeoff",
+                "equifax_account_status": "Derogatory",
+                "equifax_account_date": "11/01/2012",
+                "equifax_payment_status": "Collection/Chargeoff"
+            }
+        ]
+    },
+    "inquiry_accounts": {
+        "total": 3,
+        "limit": 250,
+        "returned": 3,
+        "accounts": [
+            [
+                "US SM BUS ADMIN ODA",
+                "Federal",
+                "07/12/2020",
+                "Experian"
+            ],
+            [
+                "SYNCB/CC",
+                "Finance/Personal",
+                "06/08/2020",
+                "TransUnion"
+            ],
+            [
+                "AMEX",
+                "Bank Credit Cards",
+                "08/25/2018",
+                "Experian"
+            ]
+        ]
+    },
+    "public_records": {
+        "total": 0,
+        "limit": 250,
+        "returned": 0,
+        "records": []
+    }
+}

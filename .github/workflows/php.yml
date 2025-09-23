@@ -42,6 +42,18 @@ jobs:
         env:
           APP_ENV: dev
 
+      - name: Static analysis
+        run: |
+          if [ -x vendor/bin/phpstan ]; then
+            vendor/bin/phpstan analyse --no-progress --memory-limit=1G
+          else
+            echo "phpstan not installed; skipping static analysis"
+          fi
+
       - name: Run PHPUnit (if configured)
         run: |
-          if [ -f phpunit.xml ] || [ -f phpunit.xml.dist ]; then vendor/bin/phpunit --testdox; else echo "No tests configured"; fi
+          if [ -f phpunit.xml ] || [ -f phpunit.xml.dist ]; then
+            php bin/phpunit --testdox
+          else
+            echo "No tests configured"
+          fi
