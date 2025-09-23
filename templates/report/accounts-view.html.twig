@@ -1,229 +1,109 @@
-<!DOCTYPE html>
-<html lang="en" class="body-full-height">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+{% extends 'base.html.twig' %}
 
-    <title>Accounts</title>
+{% block title %}{{ 'accounts.view.title'|trans }} · {{ 'app.name'|trans }}{% endblock %}
 
-    <link rel="stylesheet" href="/templates/joli/css/theme-blue.css">
+{% block body %}
+    <section class="section">
+        <div class="section__header">
+            <div>
+                <h1 class="page-title">{{ 'accounts.view.heading'|trans({'%name%': account_info.first_name ~ ' ' ~ account_info.last_name}) }}</h1>
+                <p class="muted">
+                    {{ account_info.email|default('—') }}
+                    {% if account_info.phone %} · {{ account_info.phone }}{% endif %}
+                    {% if account_info.city %} · {{ account_info.city }}, {{ account_info.state }} {{ account_info.zip }}{% endif %}
+                </p>
+            </div>
+            <div class="grid" style="gap:0.5rem; grid-auto-flow:row;">
+                <a class="button button--ghost" href="{{ path('app_account_edit', { aid: account_info.aid }) }}">{{ 'accounts.form.title_update'|trans }}</a>
+                <a class="button button--ghost" href="{{ path('app_account_list') }}">{{ 'accounts.list.heading'|trans }}</a>
+            </div>
+        </div>
 
-  </head>
-  <body>
-    <div class="page-container" style="height: 100vh;">
-        <div class="page-sidebar page-sidebar-fixed scroll">
-            <ul class="x-navigation">
-                <li class="xn-logo">
-                    <a href="/">Top Tier</a>
-                    <a href="#" class="x-navigation-control"></a>
-                </li>
-                <li class="xn-title">
-                    Navigation
-                </li>
-                <li>
-                    <a href="/dashboard">
-                        <span class="fa fa-desktop"></span>
-                        <span class="xn-text">Dashboard</span>
-                    </a>
-                </li>
-                <li class="xn-openable active">
-                    <a href="#">
-                        <span class="fa fa-cogs"></span>
-                        <span class="xn-text">Accounts</span>
-                    </a>
-                    <ul>
-                        <li>
-                            <a href="/accounts-add">
-                                <span class="fa fa-bell-o"></span>
-                                <span class="xn-text">Add Account</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="/accounts">
-                                <span class="fa fa-users"></span>
-                                <span class="xn-text">Accounts</span>
-                            </a>
-                        </li>
+        {% if errors is not empty %}
+            <div class="alert alert--error" role="alert">
+                <ul>
+                    {% for error in errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        {% if messages is not empty %}
+            <div class="alert alert--success" role="status">
+                <ul>
+                    {% for message in messages %}
+                        <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:1.5rem;">
+            <div class="card">
+                <h2>{{ 'accounts.view.upload_title'|trans }}</h2>
+                <p class="muted">{{ 'accounts.view.upload_description'|trans }}</p>
+                <form method="post" action="{{ path('app_account_view', { aid: account_info.aid }) }}" enctype="multipart/form-data" aria-describedby="account-upload-help">
+                    <input type="hidden" name="upload" value="true">
+                    <input type="hidden" name="_token" value="{{ csrf_token('account_upload') }}">
+                    <div class="form-field">
+                        <label for="html_file">{{ 'accounts.view.upload_label'|trans }}</label>
+                        <input id="html_file" type="file" name="html_file" accept="text/html,text/htm,application/xhtml+xml" required>
+                        <small id="account-upload-help">{{ 'report.upload.file_help'|trans }}</small>
+                    </div>
+                    <button class="button button--primary" type="submit" style="margin-top:1rem;">{{ 'accounts.view.submit'|trans }}</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>{{ 'accounts.view.files_title'|trans }}</h2>
+                {% if files is not empty %}
+                    <ul class="list list--files">
+                        {% for file in files %}
+                            <li>
+                                <div style="display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap;">
+                                    <span>
+                                        {{ file.filename }}<br>
+                                        <small class="muted">{{ file.added|date('Y-m-d H:i') }}</small>
+                                    </span>
+                                    <a class="button button--ghost" href="{{ path('app_parse_html', { file: file.filename }) }}" target="_blank" rel="noopener">{{ 'accounts.view.download'|trans }}</a>
+                                </div>
+                            </li>
+                        {% endfor %}
                     </ul>
-                </li>
-                <li class="xn-title">
-                    Profile
-                </li>
-                <li>
-                    <a href="/logout">
-                        <span class="glyphicon glyphicon-log-out"></span>
-                        <span class="xn-text">Logout</span>
-                    </a>
-                </li>
-            </ul>
-        </div>
-        <div class="page-content">
-            <div class="page-title">
-                <h2>Account: {{ account_info.first_name }} {{ account_info.last_name }}</h2>
+                {% else %}
+                    <p class="muted">{{ 'accounts.view.list_empty'|trans }}</p>
+                {% endif %}
             </div>
-            
-                
-            {% if errors|length > 0 %}
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="alert alert-danger">
-                            <ul>
-                            {% for key, error in errors %}
-                                <li>{{ error }}</li>
-                            {% endfor %}
-                            </ul>
-                        </div>
+
+            <div class="card" style="grid-column: 1 / -1;">
+                <h2>{{ 'accounts.view.info_title'|trans }}</h2>
+                <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:1rem;">
+                    <div>
+                        <h3>{{ 'accounts.form.address_title'|trans }}</h3>
+                        <p>
+                            {{ account_info.first_name }} {{ account_info.last_name }}<br>
+                            {{ account_info.address1|default('—') }}<br>
+                            {% if account_info.address2 %}{{ account_info.address2 }}<br>{% endif %}
+                            {{ account_info.city|default('') }}{% if account_info.city %}, {% endif %}{{ account_info.state }} {{ account_info.zip }}
+                        </p>
+                        <p class="muted">{{ account_info.email|default('—') }} · {{ account_info.phone|default('—') }}</p>
                     </div>
-                </div>
-            {% endif %}
-            {% if messages|length > 0 %}
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="alert alert-success">
-                            <ul>
-                            {% for key, message in messages %}
-                                <li>{{ message }}</li>
-                            {% endfor %}
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            {% endif %}
-            <div class="row">
-                <div class="col-md-8">
-                    <div class="panel panel-default">
-                        <div class="panel-body">
-                            <h3>Add Report</h3>
-                            <form id="uploader" method="post" action="/accounts-view?aid={{ account_info.aid }}" enctype="multipart/form-data" class="horizontal">
-                                <input type="hidden" name="upload" value="true" />
-                                <input type="hidden" name="_token" value="{{ csrf_token('account_upload') }}">
-                                <div class="form-group"> 
-                                    <label for="html_file" class="col-md-3 col-xs-12 control-label">File</label>
-                                    <div class="col-md-12">
-                                        <input id="file-uploader" type="file" class="file" data-preview-file-type="html" accept="text/html, text/htm, application/xhtml+xml" name="html_file" >
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <div class="col-md-12" style="margin-top:10px;">
-                                        <input type="submit" class="btn btn-primary" value="Upload">
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="panel panel-default">
-                        <div class="panel-body">
-                            <h3>Customer Information</h3>
-                            <table>
-                                <tbody>
-                                    <tr>
-                                        <td><strong>Name:</strong></td>
-                                        <td>{{ account_info.first_name }} {{ account_info.last_name }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td style="vertical-align: top;"><strong>Address:</strong></td>
-                                        <td>
-                                            {{ account_info.address1 }}<br/>
-                                            {{ account_info.address2 }}<br/>
-                                            {{ account_info.city }}, {{ account_info.state }} {{ account_info.zip }}
-                                        </td>
-                                    </tr>                                    
-                                    <tr>
-                                        <td><strong>Phone:</strong></td>
-                                        <td>{{ account_info.phone }}</td>
-                                    </tr>                          
-                                    <tr>
-                                        <td><strong>Email:</strong></td>
-                                        <td>{{ account_info.email }}</td>
-                                    </tr>                          
-                                    <tr>
-                                        <td><strong>Social</strong></td>
-                                        <td>XXX-XX-{{ account_info.social }}</td>
-                                    </tr>    
-                                    <tr>
-                                        <td><strong>Credit Reporting Company:</strong></td>
-                                        <td>{{ account_info.credit_company }}</td>
-                                    </tr>    
-                                    <tr>
-                                        <td><strong>Credit Reporting Username:</strong></td>
-                                        <td>{{ account_info.credit_company_user }}</td>
-                                    </tr>         
-                                    <tr>
-                                        <td><strong>Credit Reporting Password:</strong></td>
-                                        <td>
-                                            {% if account_info.credit_company_password is not empty %}
-                                                ••••••
-                                            {% endif %}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Credit Reporting Security Code:</strong></td>
-                                        <td>
-                                            {% if account_info.credit_company_code is not empty %}
-                                                ••••
-                                            {% endif %}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="2"><a href="/accounts-edit?aid={{ account_info.aid }}">Edit</a></td>
-                                    </tr>                                                                 
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="panel panel-default">
-                        <div class="panel-body">
-                            <h3>Reports</h3>
-                            {% if files|length > 0 %}
-                                <div style="margin: 8px 0 12px;">
-                                    <a class="btn btn-primary" href="/simple-audit?file={{ files[0].filename }}" style="margin-right:8px;">Simple Audit (latest)</a>
-                                    <a class="btn btn-default" href="/simple-audit.pdf?file={{ files[0].filename }}" target="_blank">Download PDF</a>
-                                    <a class="btn btn-success" href="{{ path('app_dispute_dashboard', { aid: account_info.aid }) }}" style="margin-left:8px;">Dispute Workspace</a>
-                                </div>
-                            {% else %}
-                                <div class="alert alert-info" style="margin: 8px 0 12px;">
-                                    Upload a report to generate a Simple Audit for this account.
-                                </div>
-                            {% endif %}
-                            <table  class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>File</th>
-                                        <th>Added</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% if files|length > 0 %}
-                                        {% for key, file in files %}
-                                            <tr>
-                                                <td>{{ file.fid }}</td>
-                                                <td><a href="/html-report?file={{ file.filename }}" target="_blank">{{ file.filename }}</a></td>
-                                                <td>{{ file.added }}</td>
-                                                <td>
-                                                    <a href="/simple-audit?file={{ file.filename }}" class="btn btn-xs btn-primary" style="margin-right:6px;">Simple Audit</a>
-                                                    <a href="/simple-audit.pdf?file={{ file.filename }}" class="btn btn-xs btn-default" target="_blank">PDF</a>
-                                                </td>
-                                            </tr>
-                                        {% endfor %}
-                                    {% else %}
-                                        <tr><td colspan="4">No Reports Found!</td></tr>
-                                    {% endif %}
-                                </tbody>
-                            </table>
-                        </div>
+                    <div>
+                        <h3>{{ 'accounts.form.credentials_title'|trans }}</h3>
+                        <p>
+                            <strong>{{ 'accounts.form.labels.credit_company'|trans }}:</strong> {{ account_info.credit_company|default('—') }}<br>
+                            <strong>{{ 'accounts.form.labels.credit_company_user'|trans }}:</strong> {{ account_info.credit_company_user|default('—') }}<br>
+                            <strong>{{ 'accounts.form.labels.credit_company_password'|trans }}:</strong>
+                            {% if account_info.credit_company_password %}••••••{% else %}{{ 'accounts.view.info_missing'|trans }}{% endif %}<br>
+                            <strong>{{ 'accounts.form.labels.credit_company_code'|trans }}:</strong> {{ account_info.credit_company_code|default('—') }}
+                        </p>
+                        {% if account_info.social %}
+                            <p><strong>{{ 'accounts.form.labels.social'|trans }}:</strong> •••-••-{{ account_info.social }}</p>
+                        {% endif %}
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    {% include 'footer-js.html.twig' %}
-</body>
-</html>
+    </section>
+{% endblock %}

@@ -1,68 +1,73 @@
-<!DOCTYPE html>
-<html lang="en" class="body-full-height">
+{% extends 'base.html.twig' %}
 
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+{% block title %}{{ 'login.title'|trans }} · {{ 'app.name'|trans }}{% endblock %}
 
-    <title>Accounts</title>
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .auth-wrapper {
+            min-height: calc(100vh - 4rem);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .auth-card {
+            max-width: 420px;
+            width: 100%;
+            padding: 2.5rem;
+            border-radius: 24px;
+            background: #fff;
+            box-shadow: 0 25px 45px rgba(15, 23, 42, 0.12);
+        }
+        .auth-card h1 {
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+        .auth-card p {
+            text-align: center;
+        }
+        .auth-card form {
+            margin-top: 2rem;
+        }
+    </style>
+{% endblock %}
 
-    <link rel="stylesheet" href="/templates/joli/css/theme-blue.css">
+{% block header %}{% endblock %}
 
-</head>
+{% block body %}
+    <div class="auth-wrapper">
+        <div class="auth-card" role="form" aria-labelledby="login-title">
+            <h1 id="login-title" class="page-title">{{ 'login.heading'|trans }}</h1>
+            <p class="muted">{{ 'login.description'|trans }}</p>
 
-<body>
-    <div class="login-container">
-        <div class="login-box animated fadeInDown">
-            <div class="login-logo"></div>
+            {% if error %}
+                <div class="alert alert--error" role="alert">{{ 'login.error'|trans }}</div>
+            {% endif %}
 
-            <div class="login-body">
-
-                <div class="login-title">
-                    Please login to continue.
+            <form action="{{ path('app_login') }}" method="post" class="form-grid" novalidate>
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+                <div class="form-field">
+                    <label for="username">{{ 'login.username'|trans }}</label>
+                    <input type="text" id="username" name="_username" value="{{ last_username }}" autocomplete="username" required>
                 </div>
-
-
-                {% if error %}
-                <span>{{ error.messageKey }}</span>
-                {% endif %}
-
-                <form action="{{ path('app_login') }}" method="post" class="form-horizontal">
-                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}" />
-                    <div class="form-group">
-                        <div class="col-md-12">
-                            <input type="text" class="form-control" name="_username" value="{{ last_username }}"
-                                placeholder="Username" />
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="col-md-12">
-                            <input type="password" class="form-control" name="_password" placeholder="Password" />
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="col-md-12">
-                            <input type="text" class="form-control" name="mfa_code" placeholder="Multi-factor code (if enabled)" autocomplete="one-time-code" />
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="col-md-6">
-                            &nbsp;
-                        </div>
-                        <div class="col-md-6">
-                            <button type="submit" class="btn btn-info btn-block">Login</button>
-                        </div>
-                    </div>
-
-                </form>
-            </div>
-            <div class="login-footer">
-                <div class="pull-left">
-                    &copy; 2019 Top Tier Financial Solutions.
+                <div class="form-field">
+                    <label for="password">{{ 'login.password'|trans }}</label>
+                    <input type="password" id="password" name="_password" autocomplete="current-password" required>
                 </div>
-            </div>
+                <div class="form-field">
+                    <label for="mfa_code">{{ 'login.mfa'|trans }}</label>
+                    <input type="text" id="mfa_code" name="mfa_code" autocomplete="one-time-code" inputmode="numeric">
+                </div>
+                <button type="submit" class="button button--primary">{{ 'login.submit'|trans }}</button>
+            </form>
         </div>
     </div>
-</body>
+{% endblock %}
 
-</html>
+{% block footer %}
+    <footer class="app-footer" role="contentinfo">
+        <div class="container app-footer__inner">
+            <p>&copy; {{ 'now'|date('Y') }} {{ 'login.footer'|trans }}</p>
+        </div>
+    </footer>
+{% endblock %}

@@ -18,4 +18,18 @@ class CreditReportRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, CreditReport::class);
     }
+
+    /**
+     * @return array<int, CreditReport>
+     */
+    public function findRecentForAccount(int $accountAid, int $limit = 10): array
+    {
+        return $this->createQueryBuilder('r')
+            ->andWhere('r.accountAid = :aid')
+            ->setParameter('aid', $accountAid)
+            ->orderBy('r.parsedAt', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
 }

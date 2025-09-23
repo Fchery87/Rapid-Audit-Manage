@@ -1,112 +1,52 @@
-<!DOCTYPE html>
-<html lang="en" class="body-full-height">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+{% extends 'base.html.twig' %}
 
-    <title>Accounts</title>
+{% block title %}{{ 'accounts.list.title'|trans }} · {{ 'app.name'|trans }}{% endblock %}
 
-    <link rel="stylesheet" href="/templates/joli/css/theme-blue.css">
-
-  </head>
-  <body>
-    <div class="page-container" style="height: 100vh;">
-        <div class="page-sidebar page-sidebar-fixed scroll">
-            <ul class="x-navigation">
-                <li class="xn-logo">
-                    <a href="/">Top Tier</a>
-                    <a href="#" class="x-navigation-control"></a>
-                </li>
-                <li class="xn-title">
-                    Navigation
-                </li>
-                <li>
-                    <a href="/dashboard">
-                        <span class="fa fa-desktop"></span>
-                        <span class="xn-text">Dashboard</span>
-                    </a>
-                </li>
-                <li class="xn-openable active">
-                    <a href="#">
-                        <span class="fa fa-cogs"></span>
-                        <span class="xn-text">Accounts</span>
-                    </a>
-                    <ul>
-                        <li>
-                            <a href="/accounts-add">
-                                <span class="fa fa-bell-o"></span>
-                                <span class="xn-text">Add Account</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="/accounts">
-                                <span class="fa fa-users"></span>
-                                <span class="xn-text">Accounts</span>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-                <li class="xn-title">
-                    Profile
-                </li>
-                <li>
-                    <a href="/logout">
-                        <span class="glyphicon glyphicon-log-out"></span>
-                        <span class="xn-text">Logout</span>
-                    </a>
-                </li>
-            </ul>
-        </div>
-        <div class="page-content">
-            <div class="page-title">
-                <h2>Accounts</h2>
+{% block body %}
+    <section class="section">
+        <div class="section__header">
+            <div>
+                <h1 class="page-title">{{ 'accounts.list.heading'|trans }}</h1>
+                <p class="lead">{{ 'accounts.list.description'|trans }}</p>
             </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="panel panel-default">
-                        <div class="panel-body">
-                            <table class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>First Name</th>
-                                        <th>Last Name</th>
-                                        <th>Email</th>
-                                        <th>Phone</th>
-                                        <th>&nbsp;</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% if accounts|length > 0 %}
-                                        {% for key, account in accounts %}
-                                            <tr>
-                                                <td>{{ account.aid }}</td>
-                                                <td>{{ account.first_name }}</td>
-                                                <td>{{ account.last_name }}</td>
-                                                <td>{{ account.email }}</td>
-                                                <td>{{ account.phone }}</td>
-                                                <td>
-                                                    <a href="/accounts-view?aid={{ account.aid }}">
-                                                        <span class="fa fa-pencil"></span>
-                                                    </a>
-                                                </td>
-                                            </tr>
-                                        {% endfor %}
+            <a class="button button--primary" href="{{ path('app_account_add') }}">{{ 'accounts.list.add'|trans }}</a>
+        </div>
+
+        <div class="card table-wrapper">
+            {% if accounts is not empty %}
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">{{ 'accounts.list.table.id'|trans }}</th>
+                            <th scope="col">{{ 'accounts.list.table.name'|trans }}</th>
+                            <th scope="col">{{ 'accounts.list.table.email'|trans }}</th>
+                            <th scope="col">{{ 'accounts.list.table.phone'|trans }}</th>
+                            <th scope="col">{{ 'accounts.list.table.actions'|trans }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for account in accounts %}
+                            <tr>
+                                <td>{{ account.aid }}</td>
+                                <td>{{ account.first_name }} {{ account.last_name }}</td>
+                                <td>
+                                    {% if account.email %}
+                                        <a href="mailto:{{ account.email }}">{{ account.email }}</a>
                                     {% else %}
-                                        <tr>
-                                            <td colspan="6">No Accounts Found</td>
-                                        </tr>
+                                        <span class="muted">—</span>
                                     {% endif %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                                </td>
+                                <td>{{ account.phone ?? '—' }}</td>
+                                <td>
+                                    <a class="button button--ghost" href="{{ path('app_account_view', { aid: account.aid }) }}">{{ 'accounts.list.view'|trans }}</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="table-empty">{{ 'accounts.list.empty'|trans }}</div>
+            {% endif %}
         </div>
-    </div>
-
-    {% include 'footer-js.html.twig' %}
-
-</body>
-</html>
+    </section>
+{% endblock %}

@@ -1,0 +1,222 @@
+{% set states = {
+    'AL': 'Alabama',
+    'AK': 'Alaska',
+    'AZ': 'Arizona',
+    'AR': 'Arkansas',
+    'CA': 'California',
+    'CO': 'Colorado',
+    'CT': 'Connecticut',
+    'DE': 'Delaware',
+    'DC': 'District of Columbia',
+    'FL': 'Florida',
+    'GA': 'Georgia',
+    'HI': 'Hawaii',
+    'ID': 'Idaho',
+    'IL': 'Illinois',
+    'IN': 'Indiana',
+    'IA': 'Iowa',
+    'KS': 'Kansas',
+    'KY': 'Kentucky',
+    'LA': 'Louisiana',
+    'ME': 'Maine',
+    'MD': 'Maryland',
+    'MA': 'Massachusetts',
+    'MI': 'Michigan',
+    'MN': 'Minnesota',
+    'MS': 'Mississippi',
+    'MO': 'Missouri',
+    'MT': 'Montana',
+    'NE': 'Nebraska',
+    'NV': 'Nevada',
+    'NH': 'New Hampshire',
+    'NJ': 'New Jersey',
+    'NM': 'New Mexico',
+    'NY': 'New York',
+    'NC': 'North Carolina',
+    'ND': 'North Dakota',
+    'OH': 'Ohio',
+    'OK': 'Oklahoma',
+    'OR': 'Oregon',
+    'PA': 'Pennsylvania',
+    'RI': 'Rhode Island',
+    'SC': 'South Carolina',
+    'SD': 'South Dakota',
+    'TN': 'Tennessee',
+    'TX': 'Texas',
+    'UT': 'Utah',
+    'VT': 'Vermont',
+    'VA': 'Virginia',
+    'WA': 'Washington',
+    'WV': 'West Virginia',
+    'WI': 'Wisconsin',
+    'WY': 'Wyoming'
+} %}
+
+<fieldset class="card section">
+    <legend class="section__header">
+        <span>{{ 'accounts.form.address_title'|trans }}</span>
+    </legend>
+    <div class="form-grid form-grid--two">
+        <div class="form-field">
+            <label for="first_name">{{ 'accounts.form.labels.first_name'|trans }}</label>
+            <input
+                type="text"
+                id="first_name"
+                name="first_name"
+                value="{{ parameters.first_name|default('') }}"
+                autocomplete="given-name"
+                placeholder="{{ 'accounts.form.placeholders.first_name'|trans }}"
+                required
+            >
+        </div>
+        <div class="form-field">
+            <label for="last_name">{{ 'accounts.form.labels.last_name'|trans }}</label>
+            <input
+                type="text"
+                id="last_name"
+                name="last_name"
+                value="{{ parameters.last_name|default('') }}"
+                autocomplete="family-name"
+                placeholder="{{ 'accounts.form.placeholders.last_name'|trans }}"
+                required
+            >
+        </div>
+        <div class="form-field">
+            <label for="email">{{ 'accounts.form.labels.email'|trans }}</label>
+            <input
+                type="email"
+                id="email"
+                name="email"
+                value="{{ parameters.email|default('') }}"
+                autocomplete="email"
+                placeholder="{{ 'accounts.form.placeholders.email'|trans }}"
+                required
+            >
+        </div>
+        <div class="form-field">
+            <label for="phone">{{ 'accounts.form.labels.phone'|trans }}</label>
+            <input
+                type="tel"
+                id="phone"
+                name="phone"
+                value="{{ parameters.phone|default('') }}"
+                autocomplete="tel"
+                placeholder="{{ 'accounts.form.placeholders.phone'|trans }}"
+            >
+        </div>
+        <div class="form-field">
+            <label for="address1">{{ 'accounts.form.labels.address1'|trans }}</label>
+            <input
+                type="text"
+                id="address1"
+                name="address1"
+                value="{{ parameters.address1|default('') }}"
+                autocomplete="address-line1"
+                placeholder="{{ 'accounts.form.placeholders.address1'|trans }}"
+            >
+        </div>
+        <div class="form-field">
+            <label for="address2">{{ 'accounts.form.labels.address2'|trans }}</label>
+            <input
+                type="text"
+                id="address2"
+                name="address2"
+                value="{{ parameters.address2|default('') }}"
+                autocomplete="address-line2"
+                placeholder="{{ 'accounts.form.placeholders.address2'|trans }}"
+            >
+        </div>
+        <div class="form-field">
+            <label for="city">{{ 'accounts.form.labels.city'|trans }}</label>
+            <input
+                type="text"
+                id="city"
+                name="city"
+                value="{{ parameters.city|default('') }}"
+                autocomplete="address-level2"
+                placeholder="{{ 'accounts.form.placeholders.city'|trans }}"
+            >
+        </div>
+        <div class="form-field">
+            <label for="state">{{ 'accounts.form.labels.state'|trans }}</label>
+            <select id="state" name="state" autocomplete="address-level1">
+                <option value="">—</option>
+                {% for code, label in states %}
+                    <option value="{{ code }}" {% if parameters.state|default('') == code %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-field">
+            <label for="zip">{{ 'accounts.form.labels.zip'|trans }}</label>
+            <input
+                type="text"
+                id="zip"
+                name="zip"
+                value="{{ parameters.zip|default('') }}"
+                autocomplete="postal-code"
+                placeholder="{{ 'accounts.form.placeholders.zip'|trans }}"
+            >
+        </div>
+        <div class="form-field">
+            <label for="social">{{ 'accounts.form.labels.social'|trans }}</label>
+            <input
+                type="text"
+                id="social"
+                name="social"
+                value="{{ parameters.social|default('') }}"
+                inputmode="numeric"
+                maxlength="4"
+                placeholder="{{ 'accounts.form.placeholders.social'|trans }}"
+            >
+            <small>{{ 'accounts.form.placeholders.social'|trans }}</small>
+        </div>
+    </div>
+</fieldset>
+
+<fieldset class="card section">
+    <legend class="section__header">
+        <span>{{ 'accounts.form.credentials_title'|trans }}</span>
+    </legend>
+    <div class="form-grid form-grid--two">
+        <div class="form-field">
+            <label for="credit_company">{{ 'accounts.form.labels.credit_company'|trans }}</label>
+            <input
+                type="text"
+                id="credit_company"
+                name="credit_company"
+                value="{{ parameters.credit_company|default('') }}"
+                placeholder="{{ 'accounts.form.placeholders.credit_company'|trans }}"
+            >
+        </div>
+        <div class="form-field">
+            <label for="credit_company_user">{{ 'accounts.form.labels.credit_company_user'|trans }}</label>
+            <input
+                type="text"
+                id="credit_company_user"
+                name="credit_company_user"
+                value="{{ parameters.credit_company_user|default('') }}"
+                placeholder="{{ 'accounts.form.placeholders.credit_company_user'|trans }}"
+            >
+        </div>
+        <div class="form-field">
+            <label for="credit_company_password">{{ 'accounts.form.labels.credit_company_password'|trans }}</label>
+            <input
+                type="password"
+                id="credit_company_password"
+                name="credit_company_password"
+                value="{{ parameters.credit_company_password|default('') }}"
+                placeholder="{{ 'accounts.form.placeholders.credit_company_password'|trans }}"
+            >
+        </div>
+        <div class="form-field">
+            <label for="credit_company_code">{{ 'accounts.form.labels.credit_company_code'|trans }}</label>
+            <input
+                type="text"
+                id="credit_company_code"
+                name="credit_company_code"
+                value="{{ parameters.credit_company_code|default('') }}"
+                placeholder="{{ 'accounts.form.placeholders.credit_company_code'|trans }}"
+            >
+        </div>
+    </div>
+</fieldset>

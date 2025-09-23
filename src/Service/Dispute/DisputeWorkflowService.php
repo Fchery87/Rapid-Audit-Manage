@@ -110,6 +110,8 @@ class DisputeWorkflowService
                     'created_at' => $task->getCreatedAt(),
                     'completed_at' => $task->getCompletedAt(),
                     'created_by' => $task->getCreatedBy(),
+                    'client_acknowledged_at' => $task->getClientAcknowledgedAt(),
+                    'client_acknowledged_by' => $task->getClientAcknowledgedBy(),
                 ],
                 $tasks
             ),
@@ -215,6 +217,16 @@ class DisputeWorkflowService
         if ($task->getDisputeCase()) {
             $task->getDisputeCase()->touch();
         }
+        $this->entityManager->flush();
+    }
+
+    public function acknowledgeTask(DisputeTask $task, string $acknowledgedBy): void
+    {
+        $task->markClientAcknowledged($acknowledgedBy);
+        if ($task->getDisputeCase()) {
+            $task->getDisputeCase()->touch();
+        }
+
         $this->entityManager->flush();
     }
 
