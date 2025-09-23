@@ -1,0 +1,13 @@
+.git
+.gitignore
+.env.local
+.env.test
+.env.prod
+var/cache
+var/log
+node_modules
+vendor
+.idea
+.vscode
+.DS_Store
+
