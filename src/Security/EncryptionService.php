@@ -10,7 +10,6 @@ class EncryptionService
     private const PREFIX = 'ENC::';
 
     private string $encryptionKey;
-    private string $nonceKey;
 
     public function __construct(
         #[Autowire('%env(APP_SECRET)%')] private readonly string $appSecret,
@@ -20,7 +19,6 @@ class EncryptionService
         }
 
         $this->encryptionKey = sodium_crypto_generichash($this->appSecret . ':encryption-key', '', SODIUM_CRYPTO_SECRETBOX_KEYBYTES);
-        $this->nonceKey = sodium_crypto_generichash($this->appSecret . ':nonce-key', '', SODIUM_CRYPTO_SECRETBOX_KEYBYTES);
     }
 
     public function encrypt(string $plaintext): string
@@ -30,7 +28,7 @@ class EncryptionService
             return $plaintext;
         }
 
-        $nonce = $this->deterministicNonce($plaintext);
+        $nonce = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
         $ciphertext = sodium_crypto_secretbox($plaintext, $nonce, $this->encryptionKey);
 
         return self::PREFIX . base64_encode($nonce . $ciphertext);
@@ -68,12 +66,4 @@ class EncryptionService
         return str_starts_with($value, self::PREFIX);
     }
 
-    private function deterministicNonce(string $plaintext): string
-    {
-        return substr(
-            sodium_crypto_generichash($this->nonceKey . $plaintext, '', SODIUM_CRYPTO_SECRETBOX_NONCEBYTES),
-            0,
-            SODIUM_CRYPTO_SECRETBOX_NONCEBYTES
-        );
-    }
 }
