@@ -30,6 +30,25 @@
         .right { text-align: right; }
         .btn { display: inline-block; padding: 8px 12px; border-radius: 4px; background: #0056b3; color: #fff; text-decoration: none; }
         .btn:hover { background: #00479a; }
+        .btn-secondary { background: #4a5568; }
+        .btn-secondary:hover { background: #2d3748; }
+        .card.full-width { grid-column: 1 / -1; }
+        .metrics { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
+        .metric { flex: 1 1 120px; background: #f6f8fa; border-radius: 6px; padding: 8px; border: 1px solid #e1e4e8; }
+        .metric .label { font-size: 10px; text-transform: uppercase; color: #6b7280; letter-spacing: 0.05em; }
+        .metric .value { font-weight: bold; font-size: 14px; color: #111827; margin-top: 4px; }
+        .badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; background: #eef2ff; color: #3949ab; }
+        .table-compact th, .table-compact td { font-size: 11px; }
+        .recommendations { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+        .recommendation { border: 1px solid #dfe3eb; border-radius: 6px; padding: 10px; background: #f9fbff; }
+        .recommendation h3 { margin-top: 0; font-size: 14px; }
+        .recommendation p { margin: 4px 0; }
+        .recommendation .meta { font-size: 11px; color: #4b5563; }
+        .insight-list { margin: 8px 0 0; padding-left: 18px; }
+        .insight-list li { font-size: 11px; margin-bottom: 4px; }
+        .action-plan-table td, .action-plan-table th { font-size: 11px; }
+        .action-plan-table td { vertical-align: top; }
+        .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; background: #edf2ff; color: #1a56db; font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
     </style>
 </head>
 <body>
@@ -164,6 +183,228 @@
     </div>
 
     <div class="grid" style="margin-top: 12px;">
+        <div class="card full-width">
+            <h2>Progress Over Time</h2>
+            <p class="muted">Trend: <span class="badge">{{ progress_timeline.trend|default('Stable') }}</span></p>
+            <div class="metrics">
+                {% set averageChange = progress_timeline.score_change.average|default(null) %}
+                <div class="metric">
+                    <div class="label">Average Score Change</div>
+                    <div class="value">
+                        {% if averageChange is not null %}
+                            {{ averageChange > 0 ? '+' : '' }}{{ averageChange }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="metric">
+                    <div class="label">Derogatory Delta</div>
+                    <div class="value">
+                        {% if progress_timeline.derogatory_change is not null %}
+                            {{ progress_timeline.derogatory_change > 0 ? '+' : '' }}{{ progress_timeline.derogatory_change }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="metric">
+                    <div class="label">Hard Inquiry Delta</div>
+                    <div class="value">
+                        {% if progress_timeline.inquiry_change is not null %}
+                            {{ progress_timeline.inquiry_change > 0 ? '+' : '' }}{{ progress_timeline.inquiry_change }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="metric">
+                    <div class="label">Utilization Shift</div>
+                    <div class="value">
+                        {% if progress_timeline.utilization_change is not null %}
+                            {{ progress_timeline.utilization_change > 0 ? '+' : '' }}{{ progress_timeline.utilization_change|number_format(1) }}%
+                        {% else %}
+                            —
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% set timelinePoints = progress_timeline.points|default([]) %}
+            {% if timelinePoints|length > 0 %}
+                <table class="table-compact">
+                    <thead>
+                        <tr>
+                            <th>Period</th>
+                            <th>Avg Score</th>
+                            <th>TransUnion</th>
+                            <th>Experian</th>
+                            <th>Equifax</th>
+                            <th>Derogatory</th>
+                            <th>Inquiries</th>
+                            <th>Utilization</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for point in timelinePoints %}
+                        <tr>
+                            <td>{{ point.label }}</td>
+                            <td>{{ point.average_score is not null ? point.average_score|number_format(0) : '—' }}</td>
+                            <td>{{ point.scores.trans_union is not null ? point.scores.trans_union : '—' }}</td>
+                            <td>{{ point.scores.experian is not null ? point.scores.experian : '—' }}</td>
+                            <td>{{ point.scores.equifax is not null ? point.scores.equifax : '—' }}</td>
+                            <td>{{ point.derogatory_total }}</td>
+                            <td>{{ point.inquiries_total }}</td>
+                            <td>{{ point.utilization is not null ? point.utilization|number_format(1) ~ '%' : '—' }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No historical reports on file for this account yet.</p>
+            {% endif %}
+        </div>
+
+        <div class="card">
+            <h2>Bureau Comparison</h2>
+            {% set bureaus = bureau_comparison.bureaus|default([]) %}
+            {% if bureaus|length > 0 %}
+                <table class="table-compact">
+                    <thead>
+                        <tr>
+                            <th>Bureau</th>
+                            <th>Score</th>
+                            <th>Utilization</th>
+                            <th>Inquiries</th>
+                            <th>Derogatory</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for bureau in bureaus %}
+                        <tr>
+                            <td>{{ bureau.label }}</td>
+                            <td>{{ bureau.score is not null ? bureau.score : '—' }}</td>
+                            <td>{{ bureau.utilization is not null ? bureau.utilization|number_format(1) ~ '%' : '—' }}</td>
+                            <td>{{ bureau.inquiries is not null ? bureau.inquiries : '—' }}</td>
+                            <td>{{ bureau.derogatory }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                {% if bureau_comparison.insights|default([])|length > 0 %}
+                    <ul class="insight-list">
+                        {% for insight in bureau_comparison.insights %}
+                            <li>{{ insight }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            {% else %}
+                <p>No bureau metrics available.</p>
+            {% endif %}
+        </div>
+
+        <div class="card full-width">
+            <h2>Recommendation Priorities</h2>
+            {% if recommendation_scores.overall_score is defined and recommendation_scores.overall_score is not null %}
+                <p class="muted">Overall priority score: <strong>{{ recommendation_scores.overall_score|number_format(0) }}</strong></p>
+            {% endif %}
+            <p class="muted">{{ recommendation_scores.summary|default('Maintain current progress while monitoring bureau updates.') }}</p>
+            <div class="recommendations">
+                {% for recommendation in recommendation_scores.items|default([]) %}
+                    <div class="recommendation">
+                        <h3>{{ recommendation.title }} <span class="badge">{{ recommendation.score }}</span></h3>
+                        <p>{{ recommendation.summary }}</p>
+                        <p class="meta">
+                            Impact: <strong>{{ recommendation.impact }}</strong>
+                            • Urgency: <strong>{{ recommendation.urgency }}</strong>
+                            • Owner: <strong>{{ recommendation.owner }}</strong>
+                            • Target: <strong>{{ recommendation.target_date }}</strong>
+                        </p>
+                        <ul class="insight-list">
+                            {% for step in recommendation.next_steps %}
+                                <li>{{ step }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% else %}
+                    <p>No prioritized recommendations at this time.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="card full-width">
+            <h2>Action Plan</h2>
+            <p class="muted">{{ action_plan.summary|default('Maintain consistent follow-up on existing items.') }}</p>
+            {% if not is_pdf %}
+                <p><a class="btn btn-secondary" href="{{ path('app_simple_audit_action_plan', { file: report_file }) }}">Download Action Plan CSV</a></p>
+            {% endif %}
+            {% if action_plan.milestones|default([])|length > 0 %}
+                <table class="action-plan-table">
+                    <thead>
+                        <tr>
+                            <th>Priority</th>
+                            <th>Owner</th>
+                            <th>Task</th>
+                            <th>Due</th>
+                            <th>Score</th>
+                            <th>Impact</th>
+                            <th>Urgency</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for milestone in action_plan.milestones %}
+                        <tr>
+                            <td>{{ milestone.priority }}</td>
+                            <td>{{ milestone.owner }}</td>
+                            <td>{{ milestone.title }}<br><span class="muted">{{ milestone.details }}</span></td>
+                            <td>{{ milestone.due }}</td>
+                            <td>{{ milestone.score }}</td>
+                            <td>{{ milestone.impact }}</td>
+                            <td>{{ milestone.urgency }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No analyst milestones pending.</p>
+            {% endif %}
+            {% if action_plan.open_dispute_tasks|default([])|length > 0 %}
+                <h3 style="margin-top: 12px;">Open Dispute Tasks</h3>
+                <table class="action-plan-table">
+                    <thead>
+                        <tr>
+                            <th>Owner</th>
+                            <th>Task</th>
+                            <th>Due</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for task in action_plan.open_dispute_tasks %}
+                        <tr>
+                            <td>{{ task.owner }}</td>
+                            <td>{{ task.title }}</td>
+                            <td>{{ task.due }}</td>
+                            <td>{{ task.status }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+            {% set snapshot = action_plan.progress_snapshot|default({}) %}
+            {% if snapshot %}
+                <ul class="insight-list">
+                    {% if snapshot.trend is defined %}<li>Current trend: {{ snapshot.trend }}</li>{% endif %}
+                    {% if snapshot.next_review is defined %}<li>Next review scheduled for {{ snapshot.next_review }}</li>{% endif %}
+                    {% set change = snapshot.score_change|default({}) %}
+                    {% if change.average is defined and change.average is not null %}
+                        <li>Average score movement since first pull: {{ change.average > 0 ? '+' : '' }}{{ change.average }}</li>
+                    {% endif %}
+                </ul>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="grid" style="margin-top: 12px;">
         <div class="card">
             <h2>Public Records</h2>
             <p>Total public records: <strong>{{ public_records.total }}</strong></p>
@@ -200,10 +441,29 @@
                 <li>Keep existing accounts open and pay on time.</li>
             </ol>
             <div class="cta">
-                To proceed, upload your latest credit report and schedule a follow-up to review updates. 
+                To proceed, upload your latest credit report and schedule a follow-up to review updates.
                 {% if not is_pdf %}Use the full report at <a href="/html-report?file={{ report_file|url_encode }}">Credit Analysis Report</a>.{% endif %}
             </div>
         </div>
+
+        {% if dispute_workflow is defined %}
+            <div class="card">
+                <h2>Dispute Workflow Snapshot</h2>
+                <p class="muted">Case status: <strong>{{ dispute_workflow.case.status|title }}</strong></p>
+                <p>Tasks complete: <strong>{{ dispute_workflow.case.progress.completed }}/{{ dispute_workflow.case.progress.total }}</strong> ({{ dispute_workflow.case.progress.percent }}%).</p>
+                <p>Client-facing tasks open: <strong>{{ dispute_workflow.case.progress.open_client_tasks }}</strong></p>
+                {% if dispute_workflow.recommended_items|length > 0 %}
+                    {% set targetNames = [] %}
+                    {% for item in dispute_workflow.recommended_items|slice(0,3) %}
+                        {% set targetNames = targetNames|merge([item.account]) %}
+                    {% endfor %}
+                    <p class="muted">Top targets: {{ targetNames|join(', ') }}</p>
+                {% endif %}
+                {% if not is_pdf %}
+                    <p><a class="btn" href="{{ path('app_dispute_dashboard', { aid: account.aid }) }}">Open dispute workspace</a></p>
+                {% endif %}
+            </div>
+        {% endif %}
 
         <div class="card">
             <h2>Contact</h2>
