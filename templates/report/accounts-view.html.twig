@@ -184,6 +184,7 @@
                                 <div style="margin: 8px 0 12px;">
                                     <a class="btn btn-primary" href="/simple-audit?file={{ files[0].filename }}" style="margin-right:8px;">Simple Audit (latest)</a>
                                     <a class="btn btn-default" href="/simple-audit.pdf?file={{ files[0].filename }}" target="_blank">Download PDF</a>
+                                    <a class="btn btn-success" href="{{ path('app_dispute_dashboard', { aid: account_info.aid }) }}" style="margin-left:8px;">Dispute Workspace</a>
                                 </div>
                             {% else %}
                                 <div class="alert alert-info" style="margin: 8px 0 12px;">

@@ -45,58 +45,60 @@ class ParserController extends AbstractController
             throw new NotFoundHttpException('Account details not found for file.');
         }
 
-        $parsed = $this->parser->loadReportData($absolutePath);
-        $clientData = $parsed['client_data'];
-        $derogatoryAccounts = $parsed['derogatory_accounts'];
-        $inquiryAccounts = $parsed['inquiry_accounts'];
-        $publicRecords = $parsed['public_records'];
-        $creditInfo = $parsed['credit_info'];
+        $parsedReport = $this->parser->parse($absolutePath);
+        $payload = $parsedReport->toArray();
+        $clientData = $payload['client_data'];
+        $derogatoryAccounts = $payload['derogatory_accounts'];
+        $inquiryAccounts = $payload['inquiry_accounts'];
+        $publicRecords = $payload['public_records'];
+        $creditInfo = $payload['credit_info'];
 
         return $this->render('credit-report.html.twig', [
             'first_name' => $account['first_name'],
             'last_name' => $account['last_name'],
-            'name' => $clientData->trans_union['name'],
-            'report_date' => $clientData->trans_union['report_data'],
-            'transunion_credit_score' => $clientData->trans_union['credit_score'],
-            'equifax_credit_score' => $clientData->equifax['credit_score'],
-            'experian_credit_score' => $clientData->experian['credit_score'],
-            'equifax_delinquent' => $clientData->equifax['delinquent'],
-            'experian_delinquent' => $clientData->experian['delinquent'],
-            'transunion_delinquent' => $clientData->trans_union['delinquent'],
-            'equifax_derogatory' => $clientData->equifax['derogatory'],
-            'experian_derogatory' => $clientData->experian['derogatory'],
-            'transunion_derogatory' => $clientData->trans_union['derogatory'],
-            'equifax_collection' => $clientData->equifax['collection'],
-            'experian_collection' => $clientData->experian['collection'],
-            'transunion_collection' => $clientData->trans_union['collection'],
-            'equifax_public_records' => $clientData->equifax['public_records'],
-            'experian_public_records' => $clientData->experian['public_records'],
-            'transunion_public_records' => $clientData->trans_union['public_records'],
-            'equifax_inquiries' => $clientData->equifax['inquiries'],
-            'experian_inquiries' => $clientData->experian['inquiries'],
-            'transunion_inquiries' => $clientData->trans_union['inquiries'],
+            'name' => $clientData['trans_union']['name'] ?? null,
+            'report_date' => $clientData['trans_union']['report_data'] ?? null,
+            'transunion_credit_score' => $clientData['trans_union']['credit_score'] ?? null,
+            'equifax_credit_score' => $clientData['equifax']['credit_score'] ?? null,
+            'experian_credit_score' => $clientData['experian']['credit_score'] ?? null,
+            'equifax_delinquent' => $clientData['equifax']['delinquent'] ?? null,
+            'experian_delinquent' => $clientData['experian']['delinquent'] ?? null,
+            'transunion_delinquent' => $clientData['trans_union']['delinquent'] ?? null,
+            'equifax_derogatory' => $clientData['equifax']['derogatory'] ?? null,
+            'experian_derogatory' => $clientData['experian']['derogatory'] ?? null,
+            'transunion_derogatory' => $clientData['trans_union']['derogatory'] ?? null,
+            'equifax_collection' => $clientData['equifax']['collection'] ?? null,
+            'experian_collection' => $clientData['experian']['collection'] ?? null,
+            'transunion_collection' => $clientData['trans_union']['collection'] ?? null,
+            'equifax_public_records' => $clientData['equifax']['public_records'] ?? null,
+            'experian_public_records' => $clientData['experian']['public_records'] ?? null,
+            'transunion_public_records' => $clientData['trans_union']['public_records'] ?? null,
+            'equifax_inquiries' => $clientData['equifax']['inquiries'] ?? null,
+            'experian_inquiries' => $clientData['experian']['inquiries'] ?? null,
+            'transunion_inquiries' => $clientData['trans_union']['inquiries'] ?? null,
             'derogatory_accounts' => $derogatoryAccounts['accounts'],
             'derogatory_accounts_total' => $derogatoryAccounts['total'],
             'inquiry_accounts' => $inquiryAccounts['accounts'],
             'inquiry_total' => $inquiryAccounts['total'],
-            'equifax_open_accounts' => $clientData->equifax['open_accounts'],
-            'transunion_open_accounts' => $clientData->trans_union['open_accounts'],
-            'experian_open_accounts' => $clientData->experian['open_accounts'],
-            'equifax_total_accounts' => $clientData->equifax['total_accounts'],
-            'transunion_total_accounts' => $clientData->trans_union['total_accounts'],
-            'experian_total_accounts' => $clientData->experian['total_accounts'],
-            'equifax_closed_accounts' => $clientData->equifax['closed_accounts'],
-            'transunion_closed_accounts' => $clientData->trans_union['closed_accounts'],
-            'experian_closed_accounts' => $clientData->experian['closed_accounts'],
-            'equifax_balances' => $clientData->equifax['balances'],
-            'transunion_balances' => $clientData->trans_union['balances'],
-            'experian_balances' => $clientData->experian['balances'],
-            'equifax_payments' => $clientData->equifax['payments'],
-            'transunion_payments' => $clientData->trans_union['payments'],
-            'experian_payments' => $clientData->experian['payments'],
+            'equifax_open_accounts' => $clientData['equifax']['open_accounts'] ?? null,
+            'transunion_open_accounts' => $clientData['trans_union']['open_accounts'] ?? null,
+            'experian_open_accounts' => $clientData['experian']['open_accounts'] ?? null,
+            'equifax_total_accounts' => $clientData['equifax']['total_accounts'] ?? null,
+            'transunion_total_accounts' => $clientData['trans_union']['total_accounts'] ?? null,
+            'experian_total_accounts' => $clientData['experian']['total_accounts'] ?? null,
+            'equifax_closed_accounts' => $clientData['equifax']['closed_accounts'] ?? null,
+            'transunion_closed_accounts' => $clientData['trans_union']['closed_accounts'] ?? null,
+            'experian_closed_accounts' => $clientData['experian']['closed_accounts'] ?? null,
+            'equifax_balances' => $clientData['equifax']['balances'] ?? null,
+            'transunion_balances' => $clientData['trans_union']['balances'] ?? null,
+            'experian_balances' => $clientData['experian']['balances'] ?? null,
+            'equifax_payments' => $clientData['equifax']['payments'] ?? null,
+            'transunion_payments' => $clientData['trans_union']['payments'] ?? null,
+            'experian_payments' => $clientData['experian']['payments'] ?? null,
             'public_records' => $publicRecords['records'],
             'public_records_total' => $publicRecords['total'],
             'credit_info' => $creditInfo,
+            'meta' => $payload['meta'],
         ]);
     }
 
@@ -114,9 +116,9 @@ class ParserController extends AbstractController
             throw new NotFoundHttpException('File not found!');
         }
 
-        $parsed = $this->parser->loadReportData($absolutePath);
+        $parsedReport = $this->parser->parse($absolutePath);
 
-        return $this->json($parsed);
+        return $this->json($parsedReport->toArray());
     }
 
     private function connection(): Connection
