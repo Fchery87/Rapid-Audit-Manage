@@ -6,72 +6,49 @@ return [[
 
 'Symfony.Component.Form.Form' => 0,
 'IteratorAggregate' => 1,
-'Traversable' => 2,
-'Symfony.Component.Form.FormInterface' => 3,
-'ArrayAccess' => 4,
+'Symfony.Component.Form.FormInterface' => 2,
+'Symfony.Component.Form.ClearableErrorsInterface' => 3,
+'Traversable' => 4,
 'Countable' => 5,
-'Symfony.Component.Form.ClearableErrorsInterface' => 6,
+'ArrayAccess' => 6,
 
 ], [
 
 0 => static function () {
     return \Symfony\Component\VarExporter\Internal\Hydrator::hydrate(
         $o = [
-            (($f = &\Symfony\Component\VarExporter\Internal\Registry::$factories)['Symfony\\Component\\Validator\\Mapping\\ClassMetadata'] ?? \Symfony\Component\VarExporter\Internal\Registry::f('Symfony\\Component\\Validator\\Mapping\\ClassMetadata'))(),
-            ($f['Symfony\\Component\\Validator\\Mapping\\PropertyMetadata'] ?? \Symfony\Component\VarExporter\Internal\Registry::f('Symfony\\Component\\Validator\\Mapping\\PropertyMetadata'))(),
+            (\Symfony\Component\VarExporter\Internal\Registry::$factories['Symfony\\Component\\Validator\\Mapping\\ClassMetadata'] ?? \Symfony\Component\VarExporter\Internal\Registry::f('Symfony\\Component\\Validator\\Mapping\\ClassMetadata'))(),
             clone (\Symfony\Component\VarExporter\Internal\Registry::$prototypes['Symfony\\Component\\Form\\Extension\\Validator\\Constraints\\Form'] ?? \Symfony\Component\VarExporter\Internal\Registry::p('Symfony\\Component\\Form\\Extension\\Validator\\Constraints\\Form')),
         ],
         null,
         [
             'stdClass' => [
-                'name' => [
-                    'Symfony\\Component\\Form\\Form',
-                    'children',
-                ],
-                'defaultGroup' => [
-                    'Form',
-                ],
-                'members' => [
-                    [
-                        'children' => [
-                            $o[1],
-                        ],
-                    ],
-                ],
-                'properties' => [
-                    [
-                        'children' => $o[1],
-                    ],
-                ],
                 'constraints' => [
                     [
-                        $o[2],
+                        $o[1],
                     ],
                 ],
                 'constraintsByGroup' => [
                     [
                         'Default' => [
-                            $o[2],
+                            $o[1],
                         ],
                         'Form' => [
-                            $o[2],
+                            $o[1],
                         ],
                     ],
                 ],
-                'class' => [
-                    1 => 'Symfony\\Component\\Form\\Form',
-                ],
-                'property' => [
-                    1 => 'children',
-                ],
-                'cascadingStrategy' => [
-                    1 => 2,
-                ],
                 'traversalStrategy' => [
-                    1 => 1,
+                    2,
+                ],
+                'name' => [
+                    'Symfony\\Component\\Form\\Form',
+                ],
+                'defaultGroup' => [
+                    'Form',
                 ],
                 'groups' => [
-                    2 => [
+                    1 => [
                         'Default',
                         'Form',
                     ],
@@ -111,10 +88,10 @@ return [[
         [
             'stdClass' => [
                 'name' => [
-                    'Traversable',
+                    'Symfony\\Component\\Form\\FormInterface',
                 ],
                 'defaultGroup' => [
-                    'Traversable',
+                    'FormInterface',
                 ],
             ],
         ],
@@ -131,10 +108,10 @@ return [[
         [
             'stdClass' => [
                 'name' => [
-                    'Symfony\\Component\\Form\\FormInterface',
+                    'Symfony\\Component\\Form\\ClearableErrorsInterface',
                 ],
                 'defaultGroup' => [
-                    'FormInterface',
+                    'ClearableErrorsInterface',
                 ],
             ],
         ],
@@ -151,10 +128,10 @@ return [[
         [
             'stdClass' => [
                 'name' => [
-                    'ArrayAccess',
+                    'Traversable',
                 ],
                 'defaultGroup' => [
-                    'ArrayAccess',
+                    'Traversable',
                 ],
             ],
         ],
@@ -191,10 +168,10 @@ return [[
         [
             'stdClass' => [
                 'name' => [
-                    'Symfony\\Component\\Form\\ClearableErrorsInterface',
+                    'ArrayAccess',
                 ],
                 'defaultGroup' => [
-                    'ClearableErrorsInterface',
+                    'ArrayAccess',
                 ],
             ],
         ],

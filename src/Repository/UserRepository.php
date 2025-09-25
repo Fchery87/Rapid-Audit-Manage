@@ -2,6 +2,11 @@
 
 namespace App\Repository;
 
+if (class_exists(UserRepository::class, false)) {
+    return;
+}
+
+
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;

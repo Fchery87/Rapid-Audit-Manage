@@ -29,3 +29,12 @@
 /node_modules/
 /public/build/
 /public/assets/build/
+###> phpunit/phpunit ###
+/phpunit.xml
+/.phpunit.cache/
+###< phpunit/phpunit ###
+
+# Local overrides
+/.env.test
+compose.override.yaml
+
