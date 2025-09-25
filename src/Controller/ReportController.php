@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Security\SensitiveDataProtector;
 use App\Service\FileStorage;
+use App\Service\Security\AuditTrailService;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -11,6 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[IsGranted('ROLE_ANALYST')]
 class ReportController extends AbstractController
@@ -19,6 +21,7 @@ class ReportController extends AbstractController
         private readonly FileStorage $storage,
         private readonly EntityManagerInterface $entityManager,
         private readonly SensitiveDataProtector $protector,
+        private readonly AuditTrailService $auditTrail,
     ) {
     }
 
@@ -111,6 +114,23 @@ class ReportController extends AbstractController
 
                 $this->connection()->insert('accounts', $payload);
 
+                $emailHash = $this->hashIdentifier($parameters['email']);
+                $insertId = $this->connection()->lastInsertId();
+                $accountAid = is_numeric($insertId) ? (int) $insertId : null;
+
+                $this->auditTrail->record(
+                    eventType: 'analyst.account.created',
+                    accountAid: $accountAid,
+                    actorId: $this->resolveActorId(),
+                    metadata: array_filter([
+                        'email_hash' => $emailHash,
+                        'route' => 'app_account_add',
+                    ], static fn($value) => $value !== null),
+                    subjectType: 'account',
+                    subjectId: $accountAid !== null ? (string) $accountAid : ($emailHash ?? 'unknown'),
+                    actorType: 'analyst'
+                );
+
                 $messages[] = 'Account successfully added!';
             }
         }
@@ -134,6 +154,16 @@ class ReportController extends AbstractController
         if (!$account) {
             return $this->render('report/accounts-view-not-found.html.twig');
         }
+
+        $this->auditTrail->record(
+            eventType: 'analyst.account.viewed',
+            accountAid: $aid,
+            actorId: $this->resolveActorId(),
+            metadata: ['route' => 'app_account_view'],
+            subjectType: 'account',
+            subjectId: (string) $aid,
+            actorType: 'analyst'
+        );
 
         $errors = [];
         $messages = [];
@@ -160,6 +190,18 @@ class ReportController extends AbstractController
                             'filename' => $storedName,
                             'added' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
                         ]);
+                        $this->auditTrail->record(
+                            eventType: 'analyst.account.document_uploaded',
+                            accountAid: $aid,
+                            actorId: $this->resolveActorId(),
+                            metadata: [
+                                'filename' => $storedName,
+                                'route' => 'app_account_view',
+                            ],
+                            subjectType: 'account_file',
+                            subjectId: $storedName,
+                            actorType: 'analyst'
+                        );
                         $messages[] = 'Upload successful!';
                     }
                 } catch (\RuntimeException $e) {
@@ -225,6 +267,20 @@ class ReportController extends AbstractController
 
                 $this->connection()->update('accounts', $payload, ['aid' => $aid]);
 
+                $emailHash = $this->hashIdentifier($parameters['email']);
+                $this->auditTrail->record(
+                    eventType: 'analyst.account.updated',
+                    accountAid: $aid,
+                    actorId: $this->resolveActorId(),
+                    metadata: array_filter([
+                        'email_hash' => $emailHash,
+                        'route' => 'app_account_edit',
+                    ], static fn($value) => $value !== null),
+                    subjectType: 'account',
+                    subjectId: (string) $aid,
+                    actorType: 'analyst'
+                );
+
                 $messages[] = 'Account successfully updated!';
             }
         }
@@ -234,6 +290,28 @@ class ReportController extends AbstractController
             'messages' => $messages,
             'parameters' => $parameters,
         ]);
+    }
+
+    private function resolveActorId(): string
+    {
+        $user = $this->getUser();
+
+        if ($user instanceof UserInterface) {
+            return $user->getUserIdentifier();
+        }
+
+        return 'anonymous';
+    }
+
+    private function hashIdentifier(?string $value): ?string
+    {
+        $value = trim((string) $value);
+
+        if ($value === '') {
+            return null;
+        }
+
+        return hash('sha256', mb_strtolower($value));
     }
 
     private function connection(): Connection
@@ -337,11 +415,27 @@ class ReportController extends AbstractController
 
     private function emailExists(string $email, ?int $excludeAid = null): bool
     {
-        $sql = 'SELECT COUNT(*) FROM accounts WHERE (email = :encryptedEmail OR email = :plainEmail)';
+        $lookup = $this->protector->buildLookupValues($email);
+
+        $conditions = ['email = :plainEmail'];
         $params = [
-            'encryptedEmail' => $this->protector->encryptValue($email),
             'plainEmail' => $email,
         ];
+
+        if ($lookup['pattern'] !== '') {
+            $conditions[] = 'email LIKE :encryptedEmailPattern';
+            $params['encryptedEmailPattern'] = $lookup['pattern'];
+        }
+
+        if ($lookup['legacy'] !== '') {
+            $conditions[] = 'email = :legacyEncryptedEmail';
+            $params['legacyEncryptedEmail'] = $lookup['legacy'];
+        }
+
+        $sql = sprintf(
+            'SELECT COUNT(*) FROM accounts WHERE (%s)',
+            implode(' OR ', $conditions)
+        );
 
         if ($excludeAid !== null) {
             $sql .= ' AND aid <> :aid';

@@ -33,4 +33,44 @@ class AccountLocator
 
         return $account ? $this->protector->decryptAccountRecord($account) : null;
     }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function findAccountsForEmail(string $email): array
+    {
+        $email = trim($email);
+        if ($email === '') {
+            return [];
+        }
+
+        $lookup = $this->protector->buildLookupValues($email);
+
+        $conditions = ['email = :plainEmail'];
+        $params = ['plainEmail' => $email];
+
+        if ($lookup['pattern'] !== '') {
+            $conditions[] = 'email LIKE :encryptedEmailPattern';
+            $params['encryptedEmailPattern'] = $lookup['pattern'];
+        }
+
+        if ($lookup['legacy'] !== '') {
+            $conditions[] = 'email = :legacyEncryptedEmail';
+            $params['legacyEncryptedEmail'] = $lookup['legacy'];
+        }
+
+        $sql = sprintf(
+            'SELECT a.aid, a.first_name, a.last_name, a.email, a.phone, a.address1, a.address2, a.city, a.state, a.zip FROM accounts a WHERE (%s) ORDER BY a.aid ASC',
+            implode(' OR ', $conditions)
+        );
+
+        $result = $this->connection->executeQuery($sql, $params);
+
+        $accounts = [];
+        while ($row = $result->fetchAssociative()) {
+            $accounts[(int) $row['aid']] = $this->protector->decryptAccountRecord($row);
+        }
+
+        return array_values($accounts);
+    }
 }

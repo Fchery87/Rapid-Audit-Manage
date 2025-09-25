@@ -5,12 +5,11 @@ namespace App\Controller;
 use App\Entity\CreditReport;
 use App\Repository\CreditReportRepository;
 use App\Service\Account\AccountLocator;
-use App\Service\Dispute\DisputeWorkflowService;
 use App\Service\FileStorage;
 use App\Service\PdfRenderer;
 use App\Service\ReportParser;
-use App\Service\Report\ActionPlanExporter;
-use App\Service\Report\ReportInsightsBuilder;
+use App\Service\Dispute\DisputeWorkflowService;
+use App\Service\Security\AuditTrailService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,6 +17,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[IsGranted('ROLE_ANALYST')]
 class AuditController extends AbstractController
@@ -30,8 +30,7 @@ class AuditController extends AbstractController
         private readonly EntityManagerInterface $entityManager,
         private readonly AccountLocator $accounts,
         private readonly DisputeWorkflowService $workflow,
-        private readonly ReportInsightsBuilder $insightsBuilder,
-        private readonly ActionPlanExporter $actionPlanExporter,
+        private readonly AuditTrailService $auditTrail,
     ) {
     }
 
@@ -43,11 +42,29 @@ class AuditController extends AbstractController
             throw new NotFoundHttpException('File not specified');
         }
 
-        $context = $this->buildAuditContext($file);
-        $reportData = $context['report_data'];
+        try {
+            $absolutePath = $this->storage->resolvePath($file);
+        } catch (\RuntimeException $e) {
+            throw new NotFoundHttpException('File not found!');
+        }
 
-        return $this->render('report/simple-audit.html.twig', [
-            'account' => $context['account'],
+        $account = $this->accounts->findAccountByFile($file);
+        if (!$account) {
+            throw new NotFoundHttpException('Account not found for file');
+        }
+
+        $reportData = $this->resolveReportData($file, $absolutePath, (int) $account['aid']);
+        $disputeWorkflow = $this->workflow->getCaseOverview(
+            (int) $account['aid'],
+            $account,
+            [
+                'clientData' => $reportData['clientData'],
+                'derogatory' => $reportData['derogatory'],
+            ]
+        );
+
+        $response = $this->render('report/simple-audit.html.twig', [
+            'account' => $account,
             'client_data' => $reportData['clientData'],
             'derogatory_accounts' => $reportData['derogatory'],
             'inquiry_accounts' => $reportData['inquiries'],
@@ -55,12 +72,17 @@ class AuditController extends AbstractController
             'credit_info' => $reportData['creditInfo'],
             'report_file' => $file,
             'meta' => $reportData['meta'],
-            'dispute_workflow' => $context['dispute_workflow'],
-            'progress_timeline' => $context['progress_timeline'],
-            'bureau_comparison' => $context['bureau_comparison'],
-            'recommendation_scores' => $context['recommendation_scores'],
-            'action_plan' => $context['action_plan'],
+            'dispute_workflow' => $disputeWorkflow,
         ]);
+
+        $this->auditTrail->recordAnalystReportViewed(
+            $this->resolveActorId(),
+            (int) $account['aid'],
+            $file,
+            ['format' => 'html']
+        );
+
+        return $response;
     }
 
     #[Route('/simple-audit.pdf', name: 'app_simple_audit_pdf', methods: ['GET'])]
@@ -71,9 +93,26 @@ class AuditController extends AbstractController
             throw new NotFoundHttpException('File not specified');
         }
 
-        $context = $this->buildAuditContext($file);
-        $account = $context['account'];
-        $reportData = $context['report_data'];
+        try {
+            $absolutePath = $this->storage->resolvePath($file);
+        } catch (\RuntimeException $e) {
+            throw new NotFoundHttpException('File not found!');
+        }
+
+        $account = $this->accounts->findAccountByFile($file);
+        if (!$account) {
+            throw new NotFoundHttpException('Account not found for file');
+        }
+
+        $reportData = $this->resolveReportData($file, $absolutePath, (int) $account['aid']);
+        $disputeWorkflow = $this->workflow->getCaseOverview(
+            (int) $account['aid'],
+            $account,
+            [
+                'clientData' => $reportData['clientData'],
+                'derogatory' => $reportData['derogatory'],
+            ]
+        );
 
         $html = $this->renderView('report/simple-audit.html.twig', [
             'account' => $account,
@@ -85,38 +124,22 @@ class AuditController extends AbstractController
             'report_file' => $file,
             'pdf_export' => true,
             'meta' => $reportData['meta'],
-            'dispute_workflow' => $context['dispute_workflow'],
-            'progress_timeline' => $context['progress_timeline'],
-            'bureau_comparison' => $context['bureau_comparison'],
-            'recommendation_scores' => $context['recommendation_scores'],
-            'action_plan' => $context['action_plan'],
+            'dispute_workflow' => $disputeWorkflow,
         ]);
 
-        return $this->pdfRenderer->renderPdfResponse(
+        $response = $this->pdfRenderer->renderPdfResponse(
             $html,
             sprintf('simple-audit-%s.pdf', $account['last_name'] ?? 'report')
         );
-    }
 
-    #[Route('/simple-audit/action-plan.csv', name: 'app_simple_audit_action_plan', methods: ['GET'])]
-    public function exportActionPlan(Request $request): Response
-    {
-        $file = $request->query->get('file');
-        if (!$file) {
-            throw new NotFoundHttpException('File not specified');
-        }
+        $this->auditTrail->recordAnalystReportViewed(
+            $this->resolveActorId(),
+            (int) $account['aid'],
+            $file,
+            ['format' => 'pdf']
+        );
 
-        $context = $this->buildAuditContext($file);
-        $csv = $this->actionPlanExporter->toCsv($context['action_plan']);
-
-        $account = $context['account'];
-        $suffix = $this->slugify((string) ($account['last_name'] ?? 'report'));
-        $filename = sprintf('action-plan-%s.csv', $suffix);
-
-        return new Response($csv, Response::HTTP_OK, [
-            'Content-Type' => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => sprintf('attachment; filename="%s"', $filename),
-        ]);
+        return $response;
     }
 
     private function resolveReportData(string $file, string $absolutePath, int $accountAid): array
@@ -167,86 +190,15 @@ class AuditController extends AbstractController
         ];
     }
 
-    /**
-     * @return array{
-     *     account: array<string, mixed>,
-     *     report_data: array<string, mixed>,
-     *     dispute_workflow: array<string, mixed>,
-     *     progress_timeline: array<string, mixed>,
-     *     bureau_comparison: array<string, mixed>,
-     *     recommendation_scores: array<string, mixed>,
-     *     action_plan: array<string, mixed>
-     * }
-     */
-    private function buildAuditContext(string $file): array
+    private function resolveActorId(): string
     {
-        [$account, $absolutePath] = $this->resolveAccountContext($file);
+        $user = $this->getUser();
 
-        $reportData = $this->resolveReportData($file, $absolutePath, (int) $account['aid']);
-        $disputeWorkflow = $this->workflow->getCaseOverview(
-            (int) $account['aid'],
-            $account,
-            [
-                'clientData' => $reportData['clientData'],
-                'derogatory' => $reportData['derogatory'],
-            ]
-        );
-
-        $history = $this->reports->findHistoryForAccount((int) $account['aid']);
-
-        $progressTimeline = $this->insightsBuilder->buildProgressTimeline($history, $reportData);
-        $bureauComparison = $this->insightsBuilder->buildBureauComparison(
-            $reportData['clientData'],
-            $reportData['creditInfo'],
-            $reportData['derogatory']
-        );
-        $recommendationScores = $this->insightsBuilder->buildRecommendationScores(
-            $reportData,
-            $progressTimeline,
-            $disputeWorkflow
-        );
-        $actionPlan = $this->insightsBuilder->buildActionPlan(
-            $recommendationScores,
-            $disputeWorkflow,
-            $progressTimeline
-        );
-
-        return [
-            'account' => $account,
-            'report_data' => $reportData,
-            'dispute_workflow' => $disputeWorkflow,
-            'progress_timeline' => $progressTimeline,
-            'bureau_comparison' => $bureauComparison,
-            'recommendation_scores' => $recommendationScores,
-            'action_plan' => $actionPlan,
-        ];
-    }
-
-    /**
-     * @return array{0: array<string, mixed>, 1: string}
-     */
-    private function resolveAccountContext(string $file): array
-    {
-        try {
-            $absolutePath = $this->storage->resolvePath($file);
-        } catch (\RuntimeException $e) {
-            throw new NotFoundHttpException('File not found!');
+        if ($user instanceof UserInterface) {
+            return $user->getUserIdentifier();
         }
 
-        $account = $this->accounts->findAccountByFile($file);
-        if (!$account) {
-            throw new NotFoundHttpException('Account not found for file');
-        }
-
-        return [$account, $absolutePath];
-    }
-
-    private function slugify(string $value): string
-    {
-        $value = strtolower(trim($value));
-        $value = preg_replace('/[^a-z0-9]+/', '-', $value) ?? '';
-        $value = trim($value, '-');
-
-        return $value !== '' ? $value : 'report';
+        return 'anonymous';
     }
 }
+

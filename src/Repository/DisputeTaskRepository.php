@@ -31,4 +31,22 @@ class DisputeTaskRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    /**
+     * @return array<int, DisputeTask>
+     */
+    public function findClientTasksForAccount(int $accountAid): array
+    {
+        return $this->createQueryBuilder('t')
+            ->innerJoin('t.disputeCase', 'c')
+            ->andWhere('c.accountAid = :aid')
+            ->andWhere('t.clientVisible = :visible')
+            ->setParameter('aid', $accountAid)
+            ->setParameter('visible', true)
+            ->orderBy('t.status', 'ASC')
+            ->addOrderBy('t.dueAt', 'ASC')
+            ->addOrderBy('t.createdAt', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 }

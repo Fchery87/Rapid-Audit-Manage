@@ -1,3 +1,6 @@
+{% extends 'layouts/pdf.html.twig' %}
+
+{% block stylesheets %}
 <style type="text/css">
 @page {
    size: 7in 9.25in;
@@ -22,7 +25,7 @@ p {
 .credit-graph {
     width: 250px;
     height: 145px;
-    background: url('images/credit-rainbow.png') center no-repeat;
+    background: url("{{ absolute_url(asset('images/credit-rainbow.png')) }}") center no-repeat;
 
     text-align: center;
     vertical-align: bottom;
@@ -62,9 +65,12 @@ tbody td {
 }
 
 </style>
+{% endblock %}
+
+{% block body %}
 <div id="wrapper">
     <div class="size-100" style="padding-top: 100px;">
-        <img src="images/logo-new.png" width="500" />
+        <img src="{{ absolute_url(asset('images/logo-new.png')) }}" width="500" />
 
         <h4>Credit Analysis Report</h4>
 
@@ -172,7 +178,7 @@ tbody td {
     <table style="text-align: center" class="size-100 border-none">
         <tr>
             <td colspan="2" class="border-none">
-                <img src="images/toyota-camery.png" /></br>
+                <img src="{{ absolute_url(asset('images/toyota-camery.png')) }}" /></br>
                 Brand New Toyota Camery</br>
                 $23,000</br>
                 66 month term
@@ -288,7 +294,7 @@ tbody td {
     <h5>How Are Credit Scores Calculated?</h5>
 
     <p>
-        <img src="images/credit-graph.png" />
+        <img src="{{ absolute_url(asset('images/credit-graph.png')) }}" />
     </p>
     <p>
     Fair Isaac and Vantage Score hold their credit scoring formulas as a close secret much like the formula for Coca-Cola or your grandma’s legendary double chocolate-chip cookies. This can be very frustrating for consumers when they see remarks on the credit report like “too many revolving debt accounts” and not knowing exactly that means. We will go over the scoring factors for your FICO score.
@@ -337,7 +343,7 @@ tbody td {
 
 
     <h5>Credit Score Ranges And Their Meaning</h5>
-    <p><img src="images/credit-bar.png" /></p>
+    <p><img src="{{ absolute_url(asset('images/credit-bar.png')) }}" /></p>
     <p>
     <strong>800 and Higher</strong> (Excellent) With a credit score in this range no lender will ever disapprove your loan application. Additionally, the APR (Annual Percentage Rate) on your credit cards will be the lowest possible. You'll be treated as royalty. Achieving this excellent credit rating not only requires financial knowledge and discipline, but also a good credit history. Generally speaking, to achieve this excellent rating you must also use a substantial amount of credit on an ongoing monthly basis and always repay it ahead of time.
     </p>
@@ -604,9 +610,9 @@ and do not miss any payments.</p>
             </tr>
             <tr>
                 <td>&nbsp;</td>
-                <td>{{ credit_info.trans_union_percent }}% <img src="images/{{ credit_info.trans_union_percent_img }}" /></td>
-                <td>{{ credit_info.equifax_percent }}% <img src="images/{{ credit_info.equifax_percent_img }}" /></td>
-                <td>{{ credit_info.experian_percent }}% <img src="images/{{ credit_info.experian_percent_img }}" /></td>
+                <td>{{ credit_info.trans_union_percent }}% <img src="{{ absolute_url(asset('images/' ~ credit_info.trans_union_percent_img)) }}" /></td>
+                <td>{{ credit_info.equifax_percent }}% <img src="{{ absolute_url(asset('images/' ~ credit_info.equifax_percent_img)) }}" /></td>
+                <td>{{ credit_info.experian_percent }}% <img src="{{ absolute_url(asset('images/' ~ credit_info.experian_percent_img)) }}" /></td>
             </tr>
         </tbody>
     </table>
@@ -744,3 +750,5 @@ Our site is at https://www.toptierfinancialsolutions.com/</br>
         Credit is our passion. We understand how important your credit is for your future and we we work tirelessly to make sure we are able to help you achieve your financial goals.
     </p>
 </div>
+
+{% endblock %}

@@ -1,0 +1,221 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'client.audit.title'|trans({'%date%': report.parsedAt|date('M j, Y')}) }}{% endblock %}
+
+{% block body_class %}client-audit{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .client-audit {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .client-audit__header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 1rem;
+            align-items: center;
+        }
+        .client-audit__scores {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1rem;
+        }
+        .client-audit__score-card {
+            background: rgba(37, 99, 235, 0.1);
+            border-radius: 0.9rem;
+            padding: 1rem;
+            text-align: center;
+        }
+        .client-audit__score-card strong {
+            display: block;
+            font-size: 1.5rem;
+        }
+        .client-audit__grid {
+            display: grid;
+            gap: 1.25rem;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        }
+        .client-audit section {
+            background: rgba(241, 245, 249, 0.6);
+            border-radius: 1rem;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .client-audit table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        .client-audit th,
+        .client-audit td {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid rgba(148, 163, 184, 0.4);
+            text-align: left;
+        }
+        .client-audit thead th {
+            background: rgba(148, 163, 184, 0.2);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .client-audit__list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .client-audit__list-item {
+            background: #fff;
+            border-radius: 0.75rem;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            padding: 0.75rem;
+        }
+        .client-audit__meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            font-size: 0.85rem;
+            color: #475569;
+        }
+        @media (max-width: 640px) {
+            .client-audit__header {
+                align-items: flex-start;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <article class="card client-audit">
+        <header class="client-audit__header">
+            <div>
+                <p class="muted">{{ 'client.audit.summary_for'|trans({'%name%': account.first_name ~ ' ' ~ account.last_name}) }}</p>
+                <h1 class="page-title">{{ 'client.audit.heading'|trans({'%date%': report.parsedAt|date('F j, Y')}) }}</h1>
+            </div>
+            <a class="button button--ghost" href="{{ path('app_client_dashboard', { aid: account.aid }) }}">{{ 'client.audit.back'|trans }}</a>
+        </header>
+
+        <section>
+            <h2>{{ 'client.audit.scores_title'|trans }}</h2>
+            <div class="client-audit__scores">
+                <div class="client-audit__score-card">
+                    <span>{{ 'client.audit.score.transunion'|trans }}</span>
+                    <strong>{{ client_data.trans_union.credit_score|default('—') }}</strong>
+                </div>
+                <div class="client-audit__score-card">
+                    <span>{{ 'client.audit.score.equifax'|trans }}</span>
+                    <strong>{{ client_data.equifax.credit_score|default('—') }}</strong>
+                </div>
+                <div class="client-audit__score-card">
+                    <span>{{ 'client.audit.score.experian'|trans }}</span>
+                    <strong>{{ client_data.experian.credit_score|default('—') }}</strong>
+                </div>
+            </div>
+        </section>
+
+        <div class="client-audit__grid">
+            <section>
+                <h2>{{ 'client.audit.negative_title'|trans }}</h2>
+                {% set negative_accounts = derogatory.accounts|default([]) %}
+                {% if negative_accounts %}
+                    <table>
+                        <thead>
+                            <tr>
+                                <th scope="col">{{ 'client.audit.table.account'|trans }}</th>
+                                <th scope="col">{{ 'client.audit.table.issue'|trans }}</th>
+                                <th scope="col">{{ 'client.audit.table.reported'|trans }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in negative_accounts|slice(0, 6) %}
+                                <tr>
+                                    <td>{{ item.account|default('—') }}</td>
+                                    <td>{{ item.unique_status|default('—') }}</td>
+                                    <td>{{ item.trans_union_account_date|default('—') }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p class="muted">{{ 'client.audit.empty'|trans }}</p>
+                {% endif %}
+            </section>
+
+            <section>
+                <h2>{{ 'client.audit.utilization_title'|trans }}</h2>
+                {% if credit_info %}
+                    <table>
+                        <tbody>
+                            <tr>
+                                <th scope="row">{{ 'client.audit.utilization.limit'|trans }}</th>
+                                <td>{{ credit_info.total_limit|default('—') }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">{{ 'client.audit.utilization.balance'|trans }}</th>
+                                <td>{{ credit_info.total_balance|default('—') }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">{{ 'client.audit.utilization.overall'|trans }}</th>
+                                <td>{{ credit_info.total_percent|default('—') }}%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p class="muted">{{ 'client.audit.empty'|trans }}</p>
+                {% endif %}
+            </section>
+        </div>
+
+        <div class="client-audit__grid">
+            <section>
+                <h2>{{ 'client.audit.inquiries_title'|trans }}</h2>
+                {% set inquiry_accounts = inquiries.accounts|default([]) %}
+                {% if inquiry_accounts %}
+                    <ul class="client-audit__list">
+                        {% for row in inquiry_accounts|slice(0, 6) %}
+                            {% set values = [] %}
+                            {% for value in row %}
+                                {% if value is not empty %}
+                                    {% set values = values|merge([value]) %}
+                                {% endif %}
+                            {% endfor %}
+                            <li class="client-audit__list-item">
+                                <p>{{ values ? values|join(' • ') : '—' }}</p>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="muted">{{ 'client.audit.empty'|trans }}</p>
+                {% endif %}
+            </section>
+
+            <section>
+                <h2>{{ 'client.audit.public_title'|trans }}</h2>
+                {% set public_records_list = public_records.records|default([]) %}
+                {% if public_records_list %}
+                    <ul class="client-audit__list">
+                        {% for record in public_records_list|slice(0, 6) %}
+                            <li class="client-audit__list-item">
+                                <p><strong>{{ record.type|default('—') }}</strong></p>
+                                <div class="client-audit__meta">
+                                    <span>{{ record.status|default('—') }}</span>
+                                    <span>{{ record.trans_union_files|default('—') }} / {{ record.experian_filed|default('—') }} / {{ record.equifax_filed|default('—') }}</span>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="muted">{{ 'client.audit.empty'|trans }}</p>
+                {% endif %}
+            </section>
+        </div>
+    </article>
+{% endblock %}

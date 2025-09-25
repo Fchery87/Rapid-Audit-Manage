@@ -57,6 +57,12 @@ class DisputeTask
     #[ORM\Column(name: 'created_by', type: 'string', length: 120)]
     private string $createdBy;
 
+    #[ORM\Column(name: 'client_acknowledged_at', type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $clientAcknowledgedAt = null;
+
+    #[ORM\Column(name: 'client_acknowledged_by', type: 'string', length: 120, nullable: true)]
+    private ?string $clientAcknowledgedBy = null;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
@@ -174,5 +180,50 @@ class DisputeTask
     {
         $this->createdBy = $createdBy;
         return $this;
+    }
+
+    public function getClientAcknowledgedAt(): ?\DateTimeInterface
+    {
+        return $this->clientAcknowledgedAt;
+    }
+
+    public function setClientAcknowledgedAt(?\DateTimeInterface $acknowledgedAt): self
+    {
+        $this->clientAcknowledgedAt = $acknowledgedAt;
+
+        return $this;
+    }
+
+    public function getClientAcknowledgedBy(): ?string
+    {
+        return $this->clientAcknowledgedBy;
+    }
+
+    public function setClientAcknowledgedBy(?string $clientAcknowledgedBy): self
+    {
+        $this->clientAcknowledgedBy = $clientAcknowledgedBy;
+
+        return $this;
+    }
+
+    public function markClientAcknowledged(string $acknowledgedBy): self
+    {
+        $this->clientAcknowledgedAt = new \DateTimeImmutable();
+        $this->clientAcknowledgedBy = $acknowledgedBy;
+
+        return $this;
+    }
+
+    public function clearClientAcknowledgement(): self
+    {
+        $this->clientAcknowledgedAt = null;
+        $this->clientAcknowledgedBy = null;
+
+        return $this;
+    }
+
+    public function isClientAcknowledged(): bool
+    {
+        return $this->clientAcknowledgedAt !== null;
     }
 }

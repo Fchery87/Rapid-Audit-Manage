@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Security\SensitiveDataProtector;
 use App\Service\FileStorage;
 use App\Service\ReportParser;
+use App\Service\Security\AuditTrailService;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -14,6 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[IsGranted('ROLE_ANALYST')]
 class ParserController extends AbstractController
@@ -23,6 +25,7 @@ class ParserController extends AbstractController
         private readonly ReportParser $parser,
         private readonly EntityManagerInterface $entityManager,
         private readonly SensitiveDataProtector $protector,
+        private readonly AuditTrailService $auditTrail,
     ) {
     }
 
@@ -53,7 +56,7 @@ class ParserController extends AbstractController
         $publicRecords = $payload['public_records'];
         $creditInfo = $payload['credit_info'];
 
-        return $this->render('credit-report.html.twig', [
+        $response = $this->render('credit-report.html.twig', [
             'first_name' => $account['first_name'],
             'last_name' => $account['last_name'],
             'name' => $clientData['trans_union']['name'] ?? null,
@@ -100,6 +103,15 @@ class ParserController extends AbstractController
             'credit_info' => $creditInfo,
             'meta' => $payload['meta'],
         ]);
+
+        $this->auditTrail->recordAnalystReportViewed(
+            $this->resolveActorId(),
+            isset($account['aid']) ? (int) $account['aid'] : null,
+            $fileName,
+            ['format' => 'html', 'route' => 'app_parse_html']
+        );
+
+        return $response;
     }
 
     #[Route('/parse-html-raw', name: 'app_parse_html_raw', methods: ['GET'])]
@@ -118,7 +130,16 @@ class ParserController extends AbstractController
 
         $parsedReport = $this->parser->parse($absolutePath);
 
-        return $this->json($parsedReport->toArray());
+        $response = $this->json($parsedReport->toArray());
+
+        $this->auditTrail->recordAnalystReportViewed(
+            $this->resolveActorId(),
+            $this->resolveAccountAid($fileName),
+            $fileName,
+            ['format' => 'json', 'route' => 'app_parse_html_raw']
+        );
+
+        return $response;
     }
 
     private function connection(): Connection
@@ -128,13 +149,44 @@ class ParserController extends AbstractController
 
     private function getAccountDetails(string $fileName): ?array
     {
-        $sql = 'SELECT first_name, last_name FROM accounts a INNER JOIN account_files f ON f.aid = a.aid WHERE f.filename = :filename';
+        $sql = 'SELECT a.aid, a.first_name, a.last_name FROM accounts a INNER JOIN account_files f ON f.aid = a.aid WHERE f.filename = :filename';
 
         $result = $this->connection()->executeQuery($sql, ['filename' => $fileName]);
 
         $account = $result->fetchAssociative() ?: null;
 
-        return $account ? $this->protector->decryptAccountRecord($account) : null;
+        if (!$account) {
+            return null;
+        }
+
+        $aid = isset($account['aid']) ? (int) $account['aid'] : null;
+        $account = $this->protector->decryptAccountRecord($account);
+
+        if ($aid !== null) {
+            $account['aid'] = $aid;
+        }
+
+        return $account;
+    }
+
+    private function resolveAccountAid(string $fileName): ?int
+    {
+        $sql = 'SELECT aid FROM account_files WHERE filename = :filename';
+        $result = $this->connection()->executeQuery($sql, ['filename' => $fileName]);
+        $aid = $result->fetchOne();
+
+        return $aid !== false ? (int) $aid : null;
+    }
+
+    private function resolveActorId(): string
+    {
+        $user = $this->getUser();
+
+        if ($user instanceof UserInterface) {
+            return $user->getUserIdentifier();
+        }
+
+        return 'anonymous';
     }
 }
 

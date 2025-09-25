@@ -1,482 +1,295 @@
+{% extends 'base.html.twig' %}
+
 {% set is_pdf = pdf_export is defined and pdf_export %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <title>Simple Audit - {{ account.first_name }} {{ account.last_name }}</title>
+{% block title %}{{ 'simple_audit.title'|trans({'%name%': account.first_name ~ ' ' ~ account.last_name}) }}{% endblock %}
+
+{% block body_class %}{% if is_pdf %}simple-audit--pdf{% endif %}{% endblock %}
+
+{% block header %}{% if not is_pdf %}{{ parent() }}{% endif %}{% endblock %}
+
+{% block footer %}{% if not is_pdf %}{{ parent() }}{% endif %}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
     <style>
-        body { font-family: Arial, Helvetica, sans-serif; color: #333; margin: 24px; }
-        h1, h2, h3 { color: #0056b3; margin: 0 0 8px; }
-        h1 { font-size: 22px; }
-        h2 { font-size: 18px; margin-top: 16px; }
-        h3 { font-size: 15px; margin-top: 12px; }
-        p, li, td, th { font-size: 12px; line-height: 1.5; }
-        .header { display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #eee; padding-bottom: 8px; margin-bottom: 16px; }
-        .brand { display: flex; align-items: center; gap: 12px; }
-        .brand img { height: 36px; }
-        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-        .card { border: 1px solid #e3e3e3; border-radius: 6px; padding: 12px; background: #fff; }
-        .muted { color: #666; }
-        table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-        th, td { border: 1px solid #e5e5e5; padding: 8px; text-align: left; }
-        th { background: #f6f8fa; }
-        .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-        .kpi { border: 1px solid #e3e3e3; border-radius: 6px; padding: 10px; text-align: center; }
-        .kpi .label { font-size: 11px; color: #666; }
-        .kpi .value { font-size: 18px; font-weight: bold; color: #222; }
-        .footer { margin-top: 16px; padding-top: 10px; border-top: 1px solid #eee; font-size: 11px; color: #777; }
-        .cta { margin-top: 12px; padding: 10px; background: #f0f7ff; border: 1px solid #d6e9ff; border-radius: 6px; }
-        .right { text-align: right; }
-        .btn { display: inline-block; padding: 8px 12px; border-radius: 4px; background: #0056b3; color: #fff; text-decoration: none; }
-        .btn:hover { background: #00479a; }
-        .btn-secondary { background: #4a5568; }
-        .btn-secondary:hover { background: #2d3748; }
-        .card.full-width { grid-column: 1 / -1; }
-        .metrics { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
-        .metric { flex: 1 1 120px; background: #f6f8fa; border-radius: 6px; padding: 8px; border: 1px solid #e1e4e8; }
-        .metric .label { font-size: 10px; text-transform: uppercase; color: #6b7280; letter-spacing: 0.05em; }
-        .metric .value { font-weight: bold; font-size: 14px; color: #111827; margin-top: 4px; }
-        .badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; background: #eef2ff; color: #3949ab; }
-        .table-compact th, .table-compact td { font-size: 11px; }
-        .recommendations { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
-        .recommendation { border: 1px solid #dfe3eb; border-radius: 6px; padding: 10px; background: #f9fbff; }
-        .recommendation h3 { margin-top: 0; font-size: 14px; }
-        .recommendation p { margin: 4px 0; }
-        .recommendation .meta { font-size: 11px; color: #4b5563; }
-        .insight-list { margin: 8px 0 0; padding-left: 18px; }
-        .insight-list li { font-size: 11px; margin-bottom: 4px; }
-        .action-plan-table td, .action-plan-table th { font-size: 11px; }
-        .action-plan-table td { vertical-align: top; }
-        .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; background: #edf2ff; color: #1a56db; font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
+        .simple-audit {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .simple-audit__header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 1rem;
+            align-items: center;
+        }
+        .simple-audit__brand {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .simple-audit__brand img {
+            height: 48px;
+        }
+        .simple-audit__stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
+        }
+        .simple-audit__stat {
+            background: rgba(37, 99, 235, 0.08);
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+        }
+        .simple-audit__stat strong {
+            display: block;
+            font-size: 1.35rem;
+        }
+        .simple-audit__grid {
+            display: grid;
+            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        }
+        .simple-audit table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0.75rem;
+            font-size: 0.9rem;
+        }
+        .simple-audit th,
+        .simple-audit td {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid rgba(148, 163, 184, 0.45);
+            text-align: left;
+        }
+        .simple-audit thead th {
+            background: rgba(148, 163, 184, 0.15);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+        .simple-audit__cta {
+            background: rgba(14, 165, 233, 0.08);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        .simple-audit__footer {
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            color: #64748b;
+            text-align: right;
+        }
+        @media print {
+            body.simple-audit--pdf {
+                background: #fff;
+            }
+            .simple-audit__stat {
+                background: #eef2ff;
+            }
+            .simple-audit__cta {
+                background: #f8fafc;
+            }
+        }
     </style>
-</head>
-<body>
+{% endblock %}
 
-    <div class="header">
-        <div class="brand">
-            <img src="images/logo-new.png" alt="Logo">
-            <div>
-                <h1>Simple Audit</h1>
-                <div class="muted">Client: {{ account.first_name }} {{ account.last_name }}</div>
+{% block body %}
+    <article class="card simple-audit">
+        <header class="simple-audit__header">
+            <div class="simple-audit__brand">
+                <img src="{{ absolute_url(asset('images/logo-new.png')) }}" alt="{{ 'app.name'|trans }} logo">
+                <div>
+                    <h1 class="page-title">{{ 'simple_audit.summary.headline'|trans }}</h1>
+                    <p class="muted">{{ 'simple_audit.summary.client_label'|trans }}: {{ account.first_name }} {{ account.last_name }}</p>
+                </div>
             </div>
-        </div>
-        {% if not is_pdf %}
-            <div class="right">
-                <a class="btn" href="/simple-audit.pdf?file={{ report_file|url_encode }}">Download PDF</a>
-            </div>
-        {% endif %}
-    </div>
-
-    <div class="kpis">
-        <div class="kpi">
-            <div class="label">Equifax Score</div>
-            <div class="value">{{ client_data.equifax.credit_score }}</div>
-        </div>
-        <div class="kpi">
-            <div class="label">TransUnion Score</div>
-            <div class="value">{{ client_data.trans_union.credit_score }}</div>
-        </div>
-        <div class="kpi">
-            <div class="label">Experian Score</div>
-            <div class="value">{{ client_data.experian.credit_score }}</div>
-        </div>
-        <div class="kpi">
-            <div class="label">Report Date</div>
-            <div class="value">{{ client_data.trans_union.report_data }}</div>
-        </div>
-    </div>
-
-    <div class="grid" style="margin-top: 12px;">
-        <div class="card">
-            <h2>Negative Items</h2>
-            <p>Total derogatory items: <strong>{{ derogatory_accounts.total }}</strong></p>
-            {% if derogatory_accounts.accounts|length > 0 %}
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Account</th>
-                            <th>Issue</th>
-                            <th>Dates (TU/EX/EQ)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {% for item in derogatory_accounts.accounts|slice(0,6) %}
-                        <tr>
-                            <td>{{ item.account }}</td>
-                            <td>{{ item.unique_status }}</td>
-                            <td>
-                                {{ item.trans_union_account_date }} / {{ item.experian_account_date }} / {{ item.equifax_account_date }}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-                {% if derogatory_accounts.accounts|length > 6 %}
-                    <p class="muted">Showing first 6 items. See full report for details.</p>
-                {% endif %}
-            {% else %}
-                <p>No derogatory items found.</p>
+            {% if not is_pdf and report_file is defined %}
+                <a class="button button--primary" href="{{ path('app_simple_audit_pdf', { file: report_file }) }}">{{ 'simple_audit.download'|trans }}</a>
             {% endif %}
-        </div>
+        </header>
 
-        <div class="card">
-            <h2>Credit Utilization</h2>
-            <table>
-                <tbody>
-                <tr>
-                    <td>Total Revolving Limit</td>
-                    <td>${{ credit_info.total_limit }}</td>
-                </tr>
-                <tr>
-                    <td>Total Revolving Balance</td>
-                    <td>${{ credit_info.total_balance }}</td>
-                </tr>
-                <tr>
-                    <td>Overall Utilization</td>
-                    <td>{{ credit_info.total_percent }}%</td>
-                </tr>
-                <tr>
-                    <td>Equifax</td>
-                    <td>{{ credit_info.equifax_percent }}%</td>
-                </tr>
-                <tr>
-                    <td>TransUnion</td>
-                    <td>{{ credit_info.trans_union_percent }}%</td>
-                </tr>
-                <tr>
-                    <td>Experian</td>
-                    <td>{{ credit_info.experian_percent }}%</td>
-                </tr>
-                </tbody>
-            </table>
-            <p class="muted">Tip: Aim to keep utilization under 25% on each card and overall.</p>
-        </div>
+        <section class="simple-audit__stats" aria-label="Score summary">
+            <div class="simple-audit__stat">
+                <span>{{ 'simple_audit.stats.equifax'|trans }}</span>
+                <strong>{{ client_data.equifax.credit_score }}</strong>
+            </div>
+            <div class="simple-audit__stat">
+                <span>{{ 'simple_audit.stats.transunion'|trans }}</span>
+                <strong>{{ client_data.trans_union.credit_score }}</strong>
+            </div>
+            <div class="simple-audit__stat">
+                <span>{{ 'simple_audit.stats.experian'|trans }}</span>
+                <strong>{{ client_data.experian.credit_score }}</strong>
+            </div>
+            <div class="simple-audit__stat">
+                <span>{{ 'simple_audit.stats.report_date'|trans }}</span>
+                <strong>{{ client_data.trans_union.report_data }}</strong>
+            </div>
+        </section>
 
-        <div class="card">
-            <h2>Inquiries</h2>
-            <p>Total inquiries (2 years): <strong>{{ client_data.equifax.inquiries + client_data.trans_union.inquiries + client_data.experian.inquiries }}</strong></p>
-            {% if inquiry_accounts.total > 0 %}
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Business</th>
-                            <th>Type</th>
-                            <th>Date</th>
-                            <th>Bureau</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {% for row in inquiry_accounts.accounts|slice(0,6) %}
-                        <tr>
-                            {% for v in row %}
-                                <td>{{ v }}</td>
+        <div class="simple-audit__grid">
+            <section>
+                <h2>{{ 'simple_audit.sections.negative'|trans }}</h2>
+                <p class="muted">Total derogatory items: <strong>{{ derogatory_accounts.total }}</strong></p>
+                {% if derogatory_accounts.accounts|length > 0 %}
+                    <table>
+                        <thead>
+                            <tr>
+                                <th scope="col">{{ 'simple_audit.table.account'|trans }}</th>
+                                <th scope="col">{{ 'simple_audit.table.issue'|trans }}</th>
+                                <th scope="col">{{ 'simple_audit.table.dates'|trans }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in derogatory_accounts.accounts|slice(0, 8) %}
+                                <tr>
+                                    <td>{{ item.account }}</td>
+                                    <td>{{ item.unique_status }}</td>
+                                    <td>{{ item.trans_union_account_date }} / {{ item.experian_account_date }} / {{ item.equifax_account_date }}</td>
+                                </tr>
                             {% endfor %}
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            {% else %}
-                <p>No recent inquiries found.</p>
-            {% endif %}
-        </div>
-    </div>
-
-    <div class="grid" style="margin-top: 12px;">
-        <div class="card full-width">
-            <h2>Progress Over Time</h2>
-            <p class="muted">Trend: <span class="badge">{{ progress_timeline.trend|default('Stable') }}</span></p>
-            <div class="metrics">
-                {% set averageChange = progress_timeline.score_change.average|default(null) %}
-                <div class="metric">
-                    <div class="label">Average Score Change</div>
-                    <div class="value">
-                        {% if averageChange is not null %}
-                            {{ averageChange > 0 ? '+' : '' }}{{ averageChange }}
-                        {% else %}
-                            —
-                        {% endif %}
-                    </div>
-                </div>
-                <div class="metric">
-                    <div class="label">Derogatory Delta</div>
-                    <div class="value">
-                        {% if progress_timeline.derogatory_change is not null %}
-                            {{ progress_timeline.derogatory_change > 0 ? '+' : '' }}{{ progress_timeline.derogatory_change }}
-                        {% else %}
-                            —
-                        {% endif %}
-                    </div>
-                </div>
-                <div class="metric">
-                    <div class="label">Hard Inquiry Delta</div>
-                    <div class="value">
-                        {% if progress_timeline.inquiry_change is not null %}
-                            {{ progress_timeline.inquiry_change > 0 ? '+' : '' }}{{ progress_timeline.inquiry_change }}
-                        {% else %}
-                            —
-                        {% endif %}
-                    </div>
-                </div>
-                <div class="metric">
-                    <div class="label">Utilization Shift</div>
-                    <div class="value">
-                        {% if progress_timeline.utilization_change is not null %}
-                            {{ progress_timeline.utilization_change > 0 ? '+' : '' }}{{ progress_timeline.utilization_change|number_format(1) }}%
-                        {% else %}
-                            —
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-            {% set timelinePoints = progress_timeline.points|default([]) %}
-            {% if timelinePoints|length > 0 %}
-                <table class="table-compact">
-                    <thead>
-                        <tr>
-                            <th>Period</th>
-                            <th>Avg Score</th>
-                            <th>TransUnion</th>
-                            <th>Experian</th>
-                            <th>Equifax</th>
-                            <th>Derogatory</th>
-                            <th>Inquiries</th>
-                            <th>Utilization</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {% for point in timelinePoints %}
-                        <tr>
-                            <td>{{ point.label }}</td>
-                            <td>{{ point.average_score is not null ? point.average_score|number_format(0) : '—' }}</td>
-                            <td>{{ point.scores.trans_union is not null ? point.scores.trans_union : '—' }}</td>
-                            <td>{{ point.scores.experian is not null ? point.scores.experian : '—' }}</td>
-                            <td>{{ point.scores.equifax is not null ? point.scores.equifax : '—' }}</td>
-                            <td>{{ point.derogatory_total }}</td>
-                            <td>{{ point.inquiries_total }}</td>
-                            <td>{{ point.utilization is not null ? point.utilization|number_format(1) ~ '%' : '—' }}</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            {% else %}
-                <p>No historical reports on file for this account yet.</p>
-            {% endif %}
-        </div>
-
-        <div class="card">
-            <h2>Bureau Comparison</h2>
-            {% set bureaus = bureau_comparison.bureaus|default([]) %}
-            {% if bureaus|length > 0 %}
-                <table class="table-compact">
-                    <thead>
-                        <tr>
-                            <th>Bureau</th>
-                            <th>Score</th>
-                            <th>Utilization</th>
-                            <th>Inquiries</th>
-                            <th>Derogatory</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {% for bureau in bureaus %}
-                        <tr>
-                            <td>{{ bureau.label }}</td>
-                            <td>{{ bureau.score is not null ? bureau.score : '—' }}</td>
-                            <td>{{ bureau.utilization is not null ? bureau.utilization|number_format(1) ~ '%' : '—' }}</td>
-                            <td>{{ bureau.inquiries is not null ? bureau.inquiries : '—' }}</td>
-                            <td>{{ bureau.derogatory }}</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-                {% if bureau_comparison.insights|default([])|length > 0 %}
-                    <ul class="insight-list">
-                        {% for insight in bureau_comparison.insights %}
-                            <li>{{ insight }}</li>
-                        {% endfor %}
-                    </ul>
-                {% endif %}
-            {% else %}
-                <p>No bureau metrics available.</p>
-            {% endif %}
-        </div>
-
-        <div class="card full-width">
-            <h2>Recommendation Priorities</h2>
-            {% if recommendation_scores.overall_score is defined and recommendation_scores.overall_score is not null %}
-                <p class="muted">Overall priority score: <strong>{{ recommendation_scores.overall_score|number_format(0) }}</strong></p>
-            {% endif %}
-            <p class="muted">{{ recommendation_scores.summary|default('Maintain current progress while monitoring bureau updates.') }}</p>
-            <div class="recommendations">
-                {% for recommendation in recommendation_scores.items|default([]) %}
-                    <div class="recommendation">
-                        <h3>{{ recommendation.title }} <span class="badge">{{ recommendation.score }}</span></h3>
-                        <p>{{ recommendation.summary }}</p>
-                        <p class="meta">
-                            Impact: <strong>{{ recommendation.impact }}</strong>
-                            • Urgency: <strong>{{ recommendation.urgency }}</strong>
-                            • Owner: <strong>{{ recommendation.owner }}</strong>
-                            • Target: <strong>{{ recommendation.target_date }}</strong>
-                        </p>
-                        <ul class="insight-list">
-                            {% for step in recommendation.next_steps %}
-                                <li>{{ step }}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
+                        </tbody>
+                    </table>
                 {% else %}
-                    <p>No prioritized recommendations at this time.</p>
-                {% endfor %}
-            </div>
-        </div>
+                    <p class="muted">{{ 'simple_audit.tips.negative_none'|trans }}</p>
+                {% endif %}
+            </section>
 
-        <div class="card full-width">
-            <h2>Action Plan</h2>
-            <p class="muted">{{ action_plan.summary|default('Maintain consistent follow-up on existing items.') }}</p>
-            {% if not is_pdf %}
-                <p><a class="btn btn-secondary" href="{{ path('app_simple_audit_action_plan', { file: report_file }) }}">Download Action Plan CSV</a></p>
-            {% endif %}
-            {% if action_plan.milestones|default([])|length > 0 %}
-                <table class="action-plan-table">
-                    <thead>
-                        <tr>
-                            <th>Priority</th>
-                            <th>Owner</th>
-                            <th>Task</th>
-                            <th>Due</th>
-                            <th>Score</th>
-                            <th>Impact</th>
-                            <th>Urgency</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {% for milestone in action_plan.milestones %}
-                        <tr>
-                            <td>{{ milestone.priority }}</td>
-                            <td>{{ milestone.owner }}</td>
-                            <td>{{ milestone.title }}<br><span class="muted">{{ milestone.details }}</span></td>
-                            <td>{{ milestone.due }}</td>
-                            <td>{{ milestone.score }}</td>
-                            <td>{{ milestone.impact }}</td>
-                            <td>{{ milestone.urgency }}</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            {% else %}
-                <p>No analyst milestones pending.</p>
-            {% endif %}
-            {% if action_plan.open_dispute_tasks|default([])|length > 0 %}
-                <h3 style="margin-top: 12px;">Open Dispute Tasks</h3>
-                <table class="action-plan-table">
-                    <thead>
-                        <tr>
-                            <th>Owner</th>
-                            <th>Task</th>
-                            <th>Due</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {% for task in action_plan.open_dispute_tasks %}
-                        <tr>
-                            <td>{{ task.owner }}</td>
-                            <td>{{ task.title }}</td>
-                            <td>{{ task.due }}</td>
-                            <td>{{ task.status }}</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            {% endif %}
-            {% set snapshot = action_plan.progress_snapshot|default({}) %}
-            {% if snapshot %}
-                <ul class="insight-list">
-                    {% if snapshot.trend is defined %}<li>Current trend: {{ snapshot.trend }}</li>{% endif %}
-                    {% if snapshot.next_review is defined %}<li>Next review scheduled for {{ snapshot.next_review }}</li>{% endif %}
-                    {% set change = snapshot.score_change|default({}) %}
-                    {% if change.average is defined and change.average is not null %}
-                        <li>Average score movement since first pull: {{ change.average > 0 ? '+' : '' }}{{ change.average }}</li>
-                    {% endif %}
-                </ul>
-            {% endif %}
-        </div>
-    </div>
-
-    <div class="grid" style="margin-top: 12px;">
-        <div class="card">
-            <h2>Public Records</h2>
-            <p>Total public records: <strong>{{ public_records.total }}</strong></p>
-            {% if public_records.records|length > 0 %}
+            <section>
+                <h2>{{ 'simple_audit.sections.utilization'|trans }}</h2>
                 <table>
-                    <thead>
-                        <tr>
-                            <th>Type</th>
-                            <th>Status</th>
-                            <th>Filed (TU/EX/EQ)</th>
-                        </tr>
-                    </thead>
                     <tbody>
-                    {% for rec in public_records.records|slice(0,6) %}
                         <tr>
-                            <td>{{ rec.type }}</td>
-                            <td>{{ rec.status }}</td>
-                            <td>{{ rec.trans_union_files }} / {{ rec.experian_filed }} / {{ rec.equifax_filed }}</td>
+                            <th scope="row">Total revolving limit</th>
+                            <td>${{ credit_info.total_limit }}</td>
                         </tr>
-                    {% endfor %}
+                        <tr>
+                            <th scope="row">Total revolving balance</th>
+                            <td>${{ credit_info.total_balance }}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Overall utilization</th>
+                            <td>{{ credit_info.total_percent }}%</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Equifax</th>
+                            <td>{{ credit_info.equifax_percent }}%</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">TransUnion</th>
+                            <td>{{ credit_info.trans_union_percent }}%</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Experian</th>
+                            <td>{{ credit_info.experian_percent }}%</td>
+                        </tr>
                     </tbody>
                 </table>
-            {% else %}
-                <p>No public records found.</p>
-            {% endif %}
+                <p class="muted">{{ 'simple_audit.tips.utilization'|trans }}</p>
+            </section>
         </div>
 
-        <div class="card">
-            <h2>Next Steps</h2>
-            <ol>
-                <li>Dispute derogatory items with bureaus, prioritizing most recent and severe.</li>
-                <li>Reduce revolving utilization below 25% (ideally under 10%).</li>
-                <li>Avoid new hard inquiries during the repair process.</li>
-                <li>Keep existing accounts open and pay on time.</li>
-            </ol>
-            <div class="cta">
-                To proceed, upload your latest credit report and schedule a follow-up to review updates.
-                {% if not is_pdf %}Use the full report at <a href="/html-report?file={{ report_file|url_encode }}">Credit Analysis Report</a>.{% endif %}
-            </div>
+        <div class="simple-audit__grid">
+            <section>
+                <h2>{{ 'simple_audit.sections.inquiries'|trans }}</h2>
+                <p class="muted">Total inquiries (24 months): <strong>{{ inquiry_accounts.total }}</strong></p>
+                {% if inquiry_accounts.total > 0 %}
+                    <table>
+                        <thead>
+                            <tr>
+                                <th scope="col">Business</th>
+                                <th scope="col">Type</th>
+                                <th scope="col">Date</th>
+                                <th scope="col">Bureau</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in inquiry_accounts.accounts|slice(0, 8) %}
+                                <tr>
+                                    {% for value in row %}
+                                        <td>{{ value }}</td>
+                                    {% endfor %}
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p class="muted">{{ 'simple_audit.tips.inquiries_none'|trans }}</p>
+                {% endif %}
+            </section>
+
+            <section>
+                <h2>{{ 'simple_audit.sections.public'|trans }}</h2>
+                <p class="muted">Total public records: <strong>{{ public_records.total }}</strong></p>
+                {% if public_records.records|length > 0 %}
+                    <table>
+                        <thead>
+                            <tr>
+                                <th scope="col">Type</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Filed (TU/EX/EQ)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for rec in public_records.records|slice(0, 6) %}
+                                <tr>
+                                    <td>{{ rec.type }}</td>
+                                    <td>{{ rec.status }}</td>
+                                    <td>{{ rec.trans_union_files }} / {{ rec.experian_filed }} / {{ rec.equifax_filed }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p class="muted">{{ 'simple_audit.tips.public_none'|trans }}</p>
+                {% endif %}
+            </section>
         </div>
 
-        {% if dispute_workflow is defined %}
-            <div class="card">
-                <h2>Dispute Workflow Snapshot</h2>
-                <p class="muted">Case status: <strong>{{ dispute_workflow.case.status|title }}</strong></p>
-                <p>Tasks complete: <strong>{{ dispute_workflow.case.progress.completed }}/{{ dispute_workflow.case.progress.total }}</strong> ({{ dispute_workflow.case.progress.percent }}%).</p>
-                <p>Client-facing tasks open: <strong>{{ dispute_workflow.case.progress.open_client_tasks }}</strong></p>
-                {% if dispute_workflow.recommended_items|length > 0 %}
-                    {% set targetNames = [] %}
-                    {% for item in dispute_workflow.recommended_items|slice(0,3) %}
-                        {% set targetNames = targetNames|merge([item.account]) %}
+        <div class="simple-audit__grid">
+            <section>
+                <h2>{{ 'simple_audit.sections.workflow'|trans }}</h2>
+                {% if dispute_workflow is defined %}
+                    <p class="muted">Case status: <strong>{{ dispute_workflow.case.status|title }}</strong></p>
+                    <p>Tasks complete: <strong>{{ dispute_workflow.case.progress.completed }}/{{ dispute_workflow.case.progress.total }}</strong> ({{ dispute_workflow.case.progress.percent }}%).</p>
+                    <p>Client-facing tasks open: <strong>{{ dispute_workflow.case.progress.open_client_tasks }}</strong></p>
+                    {% if dispute_workflow.recommended_items|length > 0 %}
+                        {% set targetNames = [] %}
+                        {% for item in dispute_workflow.recommended_items|slice(0,3) %}
+                            {% set targetNames = targetNames|merge([item.account]) %}
+                        {% endfor %}
+                        <p class="muted">Top targets: {{ targetNames|join(', ') }}</p>
+                    {% endif %}
+                    {% if not is_pdf %}
+                        <p><a class="button button--ghost" href="{{ path('app_dispute_dashboard', { aid: account.aid }) }}">{{ 'accounts.view.audit_link'|trans }}</a></p>
+                    {% endif %}
+                {% else %}
+                    <p class="muted">{{ 'simple_audit.tips.workflow_none'|trans }}</p>
+                {% endif %}
+            </section>
+
+            <section>
+                <h2>{{ 'simple_audit.sections.notes'|trans }}</h2>
+                <ol>
+                    {% for key in ['one', 'two', 'three', 'four'] %}
+                        <li>{{ ('simple_audit.notes.' ~ key)|trans }}</li>
                     {% endfor %}
-                    <p class="muted">Top targets: {{ targetNames|join(', ') }}</p>
-                {% endif %}
-                {% if not is_pdf %}
-                    <p><a class="btn" href="{{ path('app_dispute_dashboard', { aid: account.aid }) }}">Open dispute workspace</a></p>
-                {% endif %}
-            </div>
-        {% endif %}
-
-        <div class="card">
-            <h2>Contact</h2>
-            <p class="muted">
-                Prepared for {{ account.first_name }} {{ account.last_name }}.<br>
-                This Simple Audit is a summary; see full report for detailed analysis.
-            </p>
+                </ol>
+                <div class="simple-audit__cta">
+                    {{ 'simple_audit.tips.cta'|trans }}
+                    {% if not is_pdf and report_file is defined %}
+                        <a href="{{ path('app_parse_html', { file: report_file }) }}" target="_blank" rel="noopener">{{ 'simple_audit.tips.cta_link'|trans }}</a>.
+                    {% endif %}
+                </div>
+            </section>
         </div>
-    </div>
 
-    <div class="footer">
-        Generated by the system on {{ \"now\"|date(\"Y-m-d H:i\") }}.
-    </div>
-
-</body>
-</html>
+        <footer class="simple-audit__footer">
+            Generated on {{ 'now'|date('Y-m-d H:i') }}.
+        </footer>
+    </article>
+{% endblock %}

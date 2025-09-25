@@ -20,14 +20,14 @@ class CreditReportRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return CreditReport[]
+     * @return array<int, CreditReport>
      */
-    public function findHistoryForAccount(int $accountAid, int $limit = 12): array
+    public function findRecentForAccount(int $accountAid, int $limit = 10): array
     {
-        return $this->createQueryBuilder('report')
-            ->andWhere('report.accountAid = :aid')
+        return $this->createQueryBuilder('r')
+            ->andWhere('r.accountAid = :aid')
             ->setParameter('aid', $accountAid)
-            ->orderBy('report.parsedAt', 'DESC')
+            ->orderBy('r.parsedAt', 'DESC')
             ->setMaxResults($limit)
             ->getQuery()
             ->getResult();

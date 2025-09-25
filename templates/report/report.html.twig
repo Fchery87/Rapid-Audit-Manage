@@ -1,67 +1,69 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+{% extends 'base.html.twig' %}
 
-    <title>Report Upload</title>
+{% block title %}{{ 'report.upload.title'|trans }} · {{ 'app.name'|trans }}{% endblock %}
 
-    <link rel="stylesheet" href="/templates/joli/css/theme-blue.css">
-
-  </head>
-  <body>
-  <div class="page-container">
-    <div class="page-sidebar page-sidebar-fixed scroll">
-        <ul class="x-navigation">
-            <li class="xn-logo">
-                <a href="/">Top Tier</a>
-            </li>
-            <li class="xn-title">Navigation</li>
-            
-        </ul>
-    </div>
-
-    <div class="container">
-        <img class="center-block" src="images/logo-new.png" width="500" />
-    </div>
-
-    {% if errors|length > 0 %}
-        <div id="errors">
-            <ul>
-            {% for key, error in errors %}
-                <li>{{ error }}</li>
-            {% endfor %}
-            </ul>
+{% block body %}
+    <section class="section">
+        <div class="section__header">
+            <div>
+                <h1 class="page-title">{{ 'report.upload.heading'|trans }}</h1>
+                <p class="lead">{{ 'report.upload.description'|trans }}</p>
+            </div>
         </div>
-    {% endif %}
-    <div class="container">
-        <form id="uploader" method="post" action="/upload" enctype="multipart/form-data">
-            <fieldset>
-                <legend>Add HTML File</legend>
-                <div class="form-group has-success">
-                    <h5>{{ message }}</h5>
-                </div>
-                <div class="form-group"> 
-                    <input type="hidden" name="upload" value="true" />
-                    <input type="hidden" name="_token" value="{{ csrf_token('global_upload') }}">
-                    <label>File</label><input type="file" name="html_file" accept="text/html, text/htm, application/xhtml+xml" />
-                    <span class="help-block">Select an HTML file to upload</span>
-                    <input type="submit" name="submit" value="Upload" />
-                </div>
-            </fieldset>
-        </form>
-    </div>
 
-    <div class="container">
-        <h3>Files</h3>
-        {% if files|length > 0 %}
-            <ol>
-            {% for key, file in files %}
-                <li><a href="/html-report?file={{ file }}" target="_blank">{{ file }}</a></li>
-            {% endfor %}
-            </ol>
+        {% if errors is not empty %}
+            <div class="alert alert--error" role="alert">
+                <h2 class="sr-only">Errors</h2>
+                <ul>
+                    {% for error in errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
         {% endif %}
-    </div>
-    </div>
-  </body>
-</html>
+
+        {% if message %}
+            <div class="alert alert--success" role="status">{{ 'report.upload.success'|trans }}</div>
+        {% endif %}
+
+        <form method="post" action="{{ path('app_upload') }}" enctype="multipart/form-data" class="card" aria-describedby="upload-help">
+            <input type="hidden" name="upload" value="true">
+            <input type="hidden" name="_token" value="{{ csrf_token('global_upload') }}">
+            <div class="form-grid">
+                <div class="form-field">
+                    <label for="html_file">{{ 'report.upload.file_label'|trans }}</label>
+                    <input
+                        id="html_file"
+                        type="file"
+                        name="html_file"
+                        accept="text/html,text/htm,application/xhtml+xml"
+                        required
+                    >
+                    <small id="upload-help">{{ 'report.upload.file_help'|trans }}</small>
+                </div>
+            </div>
+            <div style="margin-top:1.5rem; display:flex; gap:0.75rem;">
+                <button class="button button--primary" type="submit">{{ 'report.upload.submit'|trans }}</button>
+                <a class="button button--ghost" href="{{ path('app_dashboard') }}">{{ 'layout.nav.dashboard'|trans }}</a>
+            </div>
+        </form>
+    </section>
+
+    <section class="section">
+        <h2>{{ 'report.upload.history'|trans }}</h2>
+        {% if files is not empty %}
+            <ul class="list list--files">
+                {% for file in files %}
+                    <li>
+                        <div style="display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap;">
+                            <span>{{ file }}</span>
+                            <a class="button button--ghost" href="{{ path('app_parse_html', { file: file }) }}" target="_blank" rel="noopener">{{ 'report.upload.open_report'|trans }}</a>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="card table-empty">{{ 'report.upload.empty'|trans }}</div>
+        {% endif %}
+    </section>
+{% endblock %}

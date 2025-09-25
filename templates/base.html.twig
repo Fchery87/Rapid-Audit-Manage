@@ -1,12 +1,86 @@
+{% set locale = app.request and app.request.locale ? app.request.locale : 'en' %}
+{% set app_name = 'app.name'|trans %}
 <!DOCTYPE html>
-<html>
+<html lang="{{ locale }}">
     <head>
         <meta charset="UTF-8">
-        <title>{% block title %}Welcome!{% endblock %}</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="{% block meta_description %}{{ 'layout.default_description'|trans }}{% endblock %}">
+        <title>
+            {% block title %}{{ app_name }}{% endblock %}
+        </title>
+        <link rel="stylesheet" href="{{ asset('build/app.css') }}">
         {% block stylesheets %}{% endblock %}
     </head>
-    <body>
-        {% block body %}{% endblock %}
+    <body class="app-body {% block body_class %}{% endblock %}">
+        <a class="skip-link" href="#main-content">{{ 'layout.skip_to_content'|trans }}</a>
+
+        {% block header %}
+            <header class="app-header" role="banner">
+                <div class="container app-header__inner">
+                    <a class="app-header__brand" href="{{ path('app_dashboard') }}">
+                        <span aria-hidden="true" class="app-header__brand-mark">⚡</span>
+                        <span class="sr-only">{{ app_name }}</span>
+                    </a>
+
+                    <button
+                        class="app-nav__toggle"
+                        type="button"
+                        data-nav-toggle
+                        aria-expanded="false"
+                        aria-controls="primary-nav"
+                    >
+                        <span class="sr-only">{{ 'layout.toggle_navigation'|trans }}</span>
+                        ☰
+                    </button>
+
+                    <nav id="primary-nav" class="app-nav" aria-label="{{ 'layout.primary_navigation'|trans }}">
+                        {% block navigation %}
+                            {% if app.user %}
+                                <ul class="app-nav__list">
+                                    {% if is_granted('ROLE_ANALYST') %}
+                                        <li class="app-nav__item">
+                                            <a class="app-nav__link" href="{{ path('app_dashboard') }}">{{ 'layout.nav.dashboard'|trans }}</a>
+                                        </li>
+                                        <li class="app-nav__item">
+                                            <a class="app-nav__link" href="{{ path('app_account_list') }}">{{ 'layout.nav.accounts'|trans }}</a>
+                                        </li>
+                                        <li class="app-nav__item">
+                                            <a class="app-nav__link" href="{{ path('app_upload') }}">{{ 'layout.nav.reports'|trans }}</a>
+                                        </li>
+                                    {% elseif is_granted('ROLE_CLIENT') %}
+                                        <li class="app-nav__item">
+                                            <a class="app-nav__link" href="{{ path('app_client_dashboard') }}">{{ 'layout.nav.client_portal'|trans }}</a>
+                                        </li>
+                                    {% endif %}
+                                    <li class="app-nav__item app-nav__item--accent">
+                                        <a class="app-nav__link" href="{{ path('app_logout') }}">{{ 'layout.nav.logout'|trans }}</a>
+                                    </li>
+                                </ul>
+                            {% else %}
+                                <p class="app-nav__guest">{{ 'layout.nav.guest'|trans }}</p>
+                            {% endif %}
+                        {% endblock %}
+                    </nav>
+                </div>
+            </header>
+        {% endblock %}
+
+        <main id="main-content" class="app-main container" role="main">
+            {% block body %}{% endblock %}
+        </main>
+
+        {% block footer %}
+            <footer class="app-footer" role="contentinfo">
+                <div class="container app-footer__inner">
+                    <p>
+                        &copy; {{ 'now'|date('Y') }} {{ app_name }} · {{ 'layout.brand_tagline'|trans }}
+                    </p>
+                </div>
+            </footer>
+        {% endblock %}
+
+        <script src="{{ asset('build/app.js') }}" defer></script>
         {% block javascripts %}{% endblock %}
     </body>
 </html>

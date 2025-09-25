@@ -1,0 +1,12 @@
+{% set locale = app.request and app.request.locale ? app.request.locale : 'en' %}
+<!DOCTYPE html>
+<html lang="{{ locale }}">
+    <head>
+        <meta charset="utf-8">
+        <title>{% block title %}PDF Document{% endblock %}</title>
+        {% block stylesheets %}{% endblock %}
+    </head>
+    <body class="{% block body_class %}{% endblock %}">
+        {% block body %}{% endblock %}
+    </body>
+</html>

@@ -1,3 +1,6 @@
+{% extends 'layouts/pdf.html.twig' %}
+
+{% block stylesheets %}
 <style type="text/css">
     @page {
         size: 7in 9.25in;
@@ -59,7 +62,7 @@
     .credit-graph {
         width: 250px;
         height: 145px;
-        background: url('images/credit-rainbow.png') center no-repeat;
+        background: url("{{ absolute_url(asset('images/credit-rainbow.png')) }}") center no-repeat;
         text-align: center;
         vertical-align: bottom;
         line-height: 145px;
@@ -114,9 +117,12 @@
         }
     }
     </style>
+{% endblock %}
+
+{% block body %}
     <div id="wrapper">
         <div class="size-100" style="padding-top: 100px;">
-            <img src="images/logo-new.png" width="500" />
+            <img src="{{ absolute_url(asset('images/logo-new.png')) }}" width="500" />
             <h4>Credit Analysis Report</h4>
             <p><i>Prepared for</i></p>
             <h3>{{ first_name }} {{ last_name }}</h3>
@@ -212,7 +218,7 @@
         <table style="text-align: center" class="size-100 border-none">
             <tr>
                 <td colspan="2" class="border-none">
-                    <img src="images/toyota-camery.png" /><br/>
+                    <img src="{{ absolute_url(asset('images/toyota-camery.png')) }}" /><br/>
                     Brand New Toyota Camry<br/>
                     $23,000<br/>
                     66-month term
@@ -330,7 +336,7 @@
     
         <h5>How Are Credit Scores Calculated?</h5>
         <p>
-            <img src="images/credit-graph.png" />
+            <img src="{{ absolute_url(asset('images/credit-graph.png')) }}" />
         </p>
         <p>
             Credit scoring formulas are proprietary secrets, much like the formula for Coca-Cola or your grandmother’s legendary cookies. This secrecy can be frustrating for consumers who see remarks on their credit report such as “too many revolving debt accounts” without a clear explanation. Here, we will break down the factors contributing to your FICO score.
@@ -379,7 +385,7 @@
         </p>
     
         <h5>Credit Score Ranges and Their Meaning</h5>
-        <p><img src="images/credit-bar.png" /></p>
+        <p><img src="{{ absolute_url(asset('images/credit-bar.png')) }}" /></p>
         <p>
             <strong>800 and Higher</strong> (Excellent) A credit score in this range ensures loan approval and the lowest possible APR on credit cards. Achieving this requires financial discipline, a good credit history, and substantial ongoing credit usage repaid promptly.
         </p>
@@ -612,9 +618,9 @@
                 </tr>
                 <tr>
                     <td>&nbsp;</td>
-                    <td>{{ credit_info.trans_union_percent }}% <img src="images/{{ credit_info.trans_union_percent_img }}" /></td>
-                    <td>{{ credit_info.equifax_percent }}% <img src="images/{{ credit_info.equifax_percent_img }}" /></td>
-                    <td>{{ credit_info.experian_percent }}% <img src="images/{{ credit_info.experian_percent_img }}" /></td>
+                    <td>{{ credit_info.trans_union_percent }}% <img src="{{ absolute_url(asset('images/' ~ credit_info.trans_union_percent_img)) }}" /></td>
+                    <td>{{ credit_info.equifax_percent }}% <img src="{{ absolute_url(asset('images/' ~ credit_info.equifax_percent_img)) }}" /></td>
+                    <td>{{ credit_info.experian_percent }}% <img src="{{ absolute_url(asset('images/' ~ credit_info.experian_percent_img)) }}" /></td>
                 </tr>
             </tbody>
         </table>
@@ -742,3 +748,4 @@
         </p>
     </div>
     
+{% endblock %}
